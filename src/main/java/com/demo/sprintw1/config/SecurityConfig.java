@@ -8,6 +8,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
@@ -45,7 +47,11 @@ public class SecurityConfig {
                 ) //Server kullanıcı bilgisini Session'da tutmasın.
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login").permitAll() /*/auth/login endpoint'ine herkes erişebilir.Rol
+                                .requestMatchers(
+                                        "/auth/login",
+                                        "/swagger-ui/**",
+                                        "/v3/api-docs/**"
+                                ).permitAll() /*/auth/login endpoint'ine herkes erişebilir.Rol
                 kontrolleri login olduktan sonra yapılır.Bu endpoint'i korusaydık kullanıcının login yapması mümkün
                 olmazdı.Token kısmına loginden sonra ihtiyacımız var.*/
 
@@ -58,10 +64,11 @@ public class SecurityConfig {
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
                         //Benim filter'ımı UsernamePasswordAuthenticationFilter'dan hemen önce çalıştır.
-                )
+                );
 
 
-                .httpBasic(Customizer.withDefaults());
+
+                //.httpBasic(Customizer.withDefaults());
 
         return http.build();
     }

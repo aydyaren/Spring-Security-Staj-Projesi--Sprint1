@@ -38,63 +38,58 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
+        System.out.println("===== JWT FILTER =====");
+        System.out.println("PATH = " + request.getRequestURI());
+        System.out.println("HEADER = " + authHeader);
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-
-            filterChain.doFilter(request, response); /*Sıradaki filtreye veya controller'a devam et.
-            Eğer bunu yazmazsak istek burada durur.Controller'a hiç gitmez.*/
-            return; //Filtreyi bitiriyoruz.
-
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        String jwt = authHeader.substring(7); /*Bearer xxxxxx kısmında "Bearer " toplam 7 karakterdir.
-        substring(7) ile Bearer kısmını atıp sadece JWT'yi alıyoruz.Artık elimizde sadece JWT String'i var.*/
+        String jwt = authHeader.substring(7);
 
-        //JWT'nin kime ait olduğunu öğrenebilmek için email'i çıkartıyoruz.
-        String email = jwtService.extractEmail(jwt);
+        System.out.println("JWT = " + jwt);
 
-        /*Email varsa ve SecurityContext içinde daha önce giriş yapmış bir kullanıcı yoksa
-        doğrulama işlemine devam ediyoruz.*/
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        try {
+            String email = jwtService.extractEmail(jwt);
 
-            //Email'e göre kullanıcıyı veritabanından getiriyoruz.
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            System.out.println("EMAIL = " + email);
 
-            //JWT gerçekten bu kullanıcıya mı ait ve süresi dolmamış mı kontrol ediyoruz.
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-                /*
-                Spring Security'nin anlayacağı bir nesne oluşturuyoruz.İçinde şunlar var: UserDetails ,Email ,Authority
-                (Role)
-                 */
+                System.out.println("TOKEN VALID");
 
-                /*Request ile ilgili detayları authentication nesnesine ekliyoruz.
-                (IP adresi, Session bilgisi vb.)*/
-                authenticationToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                /*
-                Bu satır:IP adresi , Session bilgisi (varsa) , Request bilgileri gibi ek detayları Spring'e veriyor.
-                 */
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-                /*Artık Spring Security'ye diyoruz ki:
-                Bu kullanıcı giriş yaptı.Bundan sonraki bütün işlemlerde bu kullanıcıyı kullan.Bu kullanıcı artık
-                doğrulandı.Bundan sonra herhangi bir Controller içinde Spring artık kullanıcıyı biliyor.*/
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+
+                    UsernamePasswordAuthenticationToken authenticationToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
+
+                    authenticationToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+                } else {
+                    System.out.println("TOKEN INVALID");
+                }
             }
-            /*
-            SecurityContexHolde : Spring Security'nin merkezi hafızası.
-            getContext() : SecurityContext'i getir.
-            setAuthentication(authenticationToken): Bu kullanıcı artık giriş yaptı.
-             */
+
+        } catch (Exception e) {
+            System.out.println("JWT parse hatası: " + e.getMessage());
+            // token geçersizse authentication set edilmez, controller'a devam edilir
+            // (endpoint zaten authenticated() istiyorsa yine 401 döner ama en azından
+            // stack trace loglarınızı kirletmez)
         }
 
-        //Filtrede işimiz bitti.Controller'a devam ediyoruz.
+        // Filtrede işimiz bitti. Controller'a devam ediyoruz.
         filterChain.doFilter(request, response);
     }
 }
