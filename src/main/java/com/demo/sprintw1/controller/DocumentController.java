@@ -5,17 +5,24 @@ import com.demo.sprintw1.dto.UpdateDocumentRequest;
 import com.demo.sprintw1.entity.Document;
 import com.demo.sprintw1.service.DocumentService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.MediaType;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-@RestController
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestParam;
+
+
+    @RestController
 @RequestMapping("/documents")
 //Bu controller'ın bütün endpoint'leri artık documents ile başlayacak.
 public class DocumentController {
@@ -27,8 +34,15 @@ public class DocumentController {
         this.documentService = documentService;
     }
 
-    @PostMapping
-    public Document createDocument(@Valid @RequestBody CreateDocumentRequest request) {
+
+    /*@PostMapping
+    public Document createDocument(@Valid @ModelAttribute CreateDocumentRequest request) {
+        return documentService.createDocument(request);
+    }*/
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Document createDocument(
+            @Valid @ModelAttribute CreateDocumentRequest request) {
+
         return documentService.createDocument(request);
     }
 
@@ -47,7 +61,7 @@ public class DocumentController {
     @PutMapping("/{id}")
     public Document updateDocument(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateDocumentRequest request) {
+            @Valid @ModelAttribute UpdateDocumentRequest request) {
 
         return documentService.updateDocument(id, request);
     }

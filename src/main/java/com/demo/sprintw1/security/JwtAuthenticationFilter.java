@@ -38,9 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
-        System.out.println("===== JWT FILTER =====");
-        System.out.println("PATH = " + request.getRequestURI());
-        System.out.println("HEADER = " + authHeader);
+
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -49,12 +47,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String jwt = authHeader.substring(7);
 
-        System.out.println("JWT = " + jwt);
+
 
         try {
             String email = jwtService.extractEmail(jwt);
 
-            System.out.println("EMAIL = " + email);
+
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
@@ -77,13 +75,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-                } else {
-                    System.out.println("TOKEN INVALID");
                 }
             }
 
         } catch (Exception e) {
-            System.out.println("JWT parse hatası: " + e.getMessage());
+            System.out.println("Invalid JWT: " + e.getMessage());
             // token geçersizse authentication set edilmez, controller'a devam edilir
             // (endpoint zaten authenticated() istiyorsa yine 401 döner ama en azından
             // stack trace loglarınızı kirletmez)

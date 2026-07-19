@@ -20,21 +20,34 @@ public class DocumentService {
 
     private final DocumentRepository documentRepository;
     private final UserRepository userRepository;
+    private final FileStorageService fileStorageService;
 
     public DocumentService(DocumentRepository documentRepository,
-                           UserRepository userRepository) {
+                           UserRepository userRepository,
+                           FileStorageService fileStorageService) {
+
         this.documentRepository = documentRepository;
         this.userRepository = userRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     public Document createDocument(CreateDocumentRequest request) {
 
         User owner = getCurrentUser();
 
+        String fileName = fileStorageService.saveFile(request.getFile());
+
         Document document = new Document();
         document.setTitle(request.getTitle());
         document.setDescription(request.getDescription());
         document.setOwner(owner);
+
+        document.setFileName(fileName);
+
+        if (fileName != null) {
+            document.setFilePath("uploads/" + fileName);
+        }
+
 
         return documentRepository.save(document);
     }

@@ -34,7 +34,7 @@ public class DataInitializer implements CommandLineRunner {
 
                 roleRepository.save(role); //Veritabanına kaydediyor.
 
-                System.out.println(roleName + " role created.");
+
             }
         }
 
