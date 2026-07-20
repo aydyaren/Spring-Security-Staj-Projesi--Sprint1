@@ -2,11 +2,12 @@ package com.demo.sprintw1.service;
 
 import com.demo.sprintw1.dto.CreateDocumentRequest;
 import com.demo.sprintw1.dto.UpdateDocumentRequest;
+import com.demo.sprintw1.dto.response.DocumentResponse;
 import com.demo.sprintw1.entity.Document;
 import com.demo.sprintw1.entity.User;
 import com.demo.sprintw1.repository.DocumentRepository;
 import com.demo.sprintw1.repository.UserRepository;
-
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,13 +32,14 @@ public class DocumentService {
         this.fileStorageService = fileStorageService;
     }
 
-    public Document createDocument(CreateDocumentRequest request) {
+    public DocumentResponse createDocument(CreateDocumentRequest request) {
 
-        User owner = getCurrentUser();
+        User owner = getCurrentUser(); //Giriş yapan kullanıcıyı alıyoruz.
 
-        String fileName = fileStorageService.saveFile(request.getFile());
+        String fileName = fileStorageService.saveFile(request.getFile()); //Dosyayı uploads klasörüne kaydediyoruz.
 
         Document document = new Document();
+
         document.setTitle(request.getTitle());
         document.setDescription(request.getDescription());
         document.setOwner(owner);
@@ -48,24 +50,36 @@ public class DocumentService {
             document.setFilePath("uploads/" + fileName);
         }
 
+        //Document'i veritabanına kaydediyoruz.
+        Document savedDocument = documentRepository.save(document);
 
-        return documentRepository.save(document);
+        //Entity yerine DTO döndürüyoruz.
+        return mapToResponse(savedDocument);
     }
 
-    public List<Document> getAllDocuments() {
+    public List<DocumentResponse> getAllDocuments() {
 
         User currentUser = getCurrentUser();
 
         String role = currentUser.getRole().getName();
 
+        //ADMIN ve MANAGER bütün dokümanları görebilir.
         if (role.equals("ADMIN") || role.equals("MANAGER")) {
-            return documentRepository.findAll();
+
+            return documentRepository.findAll()
+                    .stream() //Listeyi Stream'e dönüştürüyor.
+                    .map(this::mapToResponse) //Her Document'i DocumentResponse'a dönüştürüyor.
+                    .toList(); //Tekrar liste haline getiriyor.
         }
 
-        return documentRepository.findByOwner(currentUser);
+        //EMPLOYEE sadece kendi dokümanlarını görebilir.
+        return documentRepository.findByOwner(currentUser)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
-    public Document getDocumentById(Long id) {
+    public DocumentResponse getDocumentById(Long id) {
 
         Document document = documentRepository.findById(id)
                 .orElseThrow(() ->
@@ -75,12 +89,13 @@ public class DocumentService {
                         )
                 );
 
+        //Dokümanın sahibi mi diye kontrol ediyoruz.
         checkOwnership(document);
 
-        return document;
+        return mapToResponse(document);
     }
 
-    public Document updateDocument(Long id, UpdateDocumentRequest request) {
+    public DocumentResponse updateDocument(Long id, UpdateDocumentRequest request) {
 
         Document document = documentRepository.findById(id)
                 .orElseThrow(() ->
@@ -90,8 +105,10 @@ public class DocumentService {
                         )
                 );
 
+        //Güncelleme yapmaya yetkisi var mı kontrol ediyoruz.
         checkOwnership(document);
 
+        //Sadece dolu gelen alanları güncelliyoruz.
         if (request.getTitle() != null) {
             document.setTitle(request.getTitle());
         }
@@ -100,7 +117,9 @@ public class DocumentService {
             document.setDescription(request.getDescription());
         }
 
-        return documentRepository.save(document);
+        Document updatedDocument = documentRepository.save(document);
+
+        return mapToResponse(updatedDocument);
     }
 
     public void deleteDocument(Long id) {
@@ -113,9 +132,32 @@ public class DocumentService {
                         )
                 );
 
+        //Silmeye yetkisi var mı kontrol ediyoruz.
         checkOwnership(document);
 
+        //Önce fiziksel dosyayı siliyoruz.
+        fileStorageService.deleteFile(document.getFilePath());
+
+        //Sonra veritabanındaki kaydı siliyoruz.
         documentRepository.delete(document);
+    }
+
+    public Resource downloadDocument(Long id) {
+
+        //Veritabanından Document'i çekiyoruz.
+        Document document = documentRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Document not found"
+                        )
+                );
+
+        //Dosyayı indirmeye yetkisi var mı kontrol ediyoruz.
+        checkOwnership(document);
+
+        //Dosyayı uploads klasöründen okuyup Controller'a gönderiyoruz.
+        return fileStorageService.loadFile(document.getFilePath());
     }
 
     private User getCurrentUser() {
@@ -123,8 +165,10 @@ public class DocumentService {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
+        //JWT içerisindeki email bilgisini alıyoruz.
         String email = authentication.getName();
 
+        //Email'e göre kullanıcıyı veritabanından çekiyoruz.
         return userRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -140,17 +184,32 @@ public class DocumentService {
 
         String role = currentUser.getRole().getName();
 
-        // ADMIN ve MANAGER her dokümana erişebilir.
+        //ADMIN ve MANAGER her dokümana erişebilir.
         if (role.equals("ADMIN") || role.equals("MANAGER")) {
             return;
         }
 
-        // EMPLOYEE sadece kendi dokümanına erişebilir.
+        //EMPLOYEE sadece kendi dokümanına erişebilir.
         if (!document.getOwner().getId().equals(currentUser.getId())) {
+
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
                     "You are not allowed to access this document"
             );
         }
+    }
+
+    //Entity'yi API'nin döneceği DTO'ya dönüştürüyoruz.
+    private DocumentResponse mapToResponse(Document document) {
+
+        return new DocumentResponse(
+                document.getId(),
+                document.getTitle(),
+                document.getDescription(),
+                document.getFileName(),
+                document.getCreatedAt(),
+                document.getUpdatedAt(),
+                document.getOwner().getUsername()
+        );
     }
 }
