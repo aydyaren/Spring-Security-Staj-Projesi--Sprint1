@@ -27,26 +27,34 @@ public class AuthService { //Dependency Injection
     }
 
     public String login(LoginRequest request) {
-        authenticationManager.authenticate( /*Spring Security, bu kullanıcının giriş yapmasını dene.
-        Yani login işlemini başlatıyoruz.Email ve şifreyi kontrol eder.Yanlışsa burada exception fırlatır ve metodun
-        geri kalanı çalışmaz.*/
+
+        /*
+         Kullanıcı login alanına ister e-mail ister username yazabilir.
+         Önce veritabanında her iki alanda da arıyoruz.
+         */
+        User user = userRepository
+                .findByEmailOrUsername(request.getLogin(), request.getLogin())
+                /*
+                Doğrulanmış kullanıcıyı veritabanından alıyoruz.
+                Neden? Çünkü JWT'nin içine koyacağımız:
+                email, role gibi bilgiler User nesnesinde var.
+                 */
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        authenticationManager.authenticate(
+                /*Spring Security, bu kullanıcının giriş yapmasını dene.
+                Yani login işlemini başlatıyoruz.
+                Email ve şifreyi kontrol eder.
+                Yanlışsa burada exception fırlatır ve metodun
+                geri kalanı çalışmaz.*/
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
+                        user.getEmail(),      // Spring Security mevcut yapıda email ile çalışıyor.
                         request.getPassword()
                 )
         );
 
-        User user = userRepository.findByEmail(request.getEmail())
-                /*
-                Doğrulanmış kullanıcıyı veritabanından alıyoruz.Neden? Çünkü JWT'nin içine koyacağımız: email role gibi
-                gibi bilgiler User nesnesinde var.
-                 */
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
         return jwtService.generateToken(user);
         //JWT oluşturuyoruz.Controller'a String olarak dönüyor.Controller da bunu kullanıcıya döndürüyor.
-
-
     }
 
 }
@@ -66,7 +74,7 @@ AuthService'de bu satırı yazdık:
 
 authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(
-                request.getEmail(),
+                user.getEmail(),
                 request.getPassword()
         )
 );
@@ -76,4 +84,4 @@ Ama bu metodu çağıran kimse yok. Yani şu an Postman'den: POST /login atarsak
 Böyle bir endpoint yok.
 
 çünkü henüz AuthController yazmadık.
- */
+*/

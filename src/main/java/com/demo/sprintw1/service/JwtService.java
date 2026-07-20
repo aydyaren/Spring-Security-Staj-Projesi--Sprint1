@@ -4,10 +4,12 @@ import com.demo.sprintw1.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -15,10 +17,23 @@ import java.util.function.Function;
 public class JwtService {
 
     // SecretKey : JWT'nin imzasını oluşturacak gizli anahtar
-    private final SecretKey secretKey =
-            Keys.hmacShaKeyFor( //Bu metod bize güvenli bir Secret Key oluşturuyor.
-                    "my-super-secret-key-my-super-secret-key".getBytes()
-            );
+    // Artık kaynak kodunda sabit (hardcoded) değil, application.properties
+    // üzerinden (ve oradan da environment variable üzerinden) okunuyor.
+    // Böylece secret Git repository'sine commit edilmiyor.
+    private final SecretKey secretKey;
+
+    // Token geçerlilik süresi de application.properties'ten okunuyor.
+    private final long expirationMs;
+
+    public JwtService(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expiration-ms}") long expirationMs) {
+
+        this.secretKey = Keys.hmacShaKeyFor( //Bu metod bize güvenli bir Secret Key oluşturuyor.
+                secret.getBytes(StandardCharsets.UTF_8)
+        );
+        this.expirationMs = expirationMs;
+    }
 
     // JWT oluştur
 
@@ -27,8 +42,8 @@ public class JwtService {
                 .subject(user.getEmail()) // token'ın sahibi kim? Kimin e-mail ve role verilerini alıyoruz?
                 .claim("role", user.getRole().getName()) //Burada Payload'a kendi alanımızı ekliyoruz
                 .issuedAt(new Date())  //Bu token şu anda oluşturuldu.
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-                //token 1 saat geçerli olsun.
+                .expiration(new Date(System.currentTimeMillis() + expirationMs))
+                //token application.properties'te tanımlı süre kadar geçerli olsun.
                 .signWith(secretKey) //Signature burada oluşuyor.
                 .compact();
                 /*

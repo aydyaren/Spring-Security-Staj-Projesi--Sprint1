@@ -10,14 +10,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
 import com.demo.sprintw1.dto.response.DocumentResponse;
+import com.demo.sprintw1.dto.response.DocumentDownloadResponse;
 
 
 @RestController
@@ -41,13 +45,13 @@ public class DocumentController {
         return documentService.createDocument(request);
     }
 
-    
+
     @GetMapping
     public List<DocumentResponse> getAllDocuments() {
         return documentService.getAllDocuments();
 
     }
-    
+
     @GetMapping("/test")
     public String test() {
         return "Controller çalıştı";
@@ -75,13 +79,26 @@ public class DocumentController {
     @GetMapping("/{id}/download") //Endpoint.
     public ResponseEntity<Resource> downloadDocument(@PathVariable Long id) {
 
-        Resource resource = documentService.downloadDocument(id);
+        // Service artık hem dosyayı (Resource) hem de kullanıcıya
+        // gösterilecek orijinal dosya adını birlikte döndürüyor.
+        DocumentDownloadResponse download = documentService.downloadDocument(id);
+
+        Resource resource = download.resource();
+
+        // Content-Disposition header'ını manuel string birleştirme yerine
+        // Spring'in builder'ıyla oluşturuyoruz; bu sayede orijinal dosya adında
+        // özel karakter (", \r\n vb.) olsa bile header injection riski oluşmuyor.
+        ContentDisposition contentDisposition = ContentDisposition.attachment()
+                .filename(download.originalFileName(), StandardCharsets.UTF_8)
+                .build();
+
+        // Dosya uzantısına göre uygun Content-Type'ı otomatik belirliyoruz.
+        MediaType mediaType = MediaTypeFactory.getMediaType(resource)
+                .orElse(MediaType.APPLICATION_OCTET_STREAM);
 
         return ResponseEntity.ok()
-                .header(
-                        HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + resource.getFilename() + "\""
-                )
+                .contentType(mediaType)
+                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
                 .body(resource);
     }
 

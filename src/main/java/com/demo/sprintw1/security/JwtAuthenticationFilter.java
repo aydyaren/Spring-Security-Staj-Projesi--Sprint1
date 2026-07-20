@@ -28,6 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                    CustomUserDetailsService userDetailsService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+
     }
 
     @Override
@@ -74,6 +75,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
 
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+                    // Geçici kontrol için
+                    System.out.println("Authorities: " + userDetails.getAuthorities());
 
                 }
             }

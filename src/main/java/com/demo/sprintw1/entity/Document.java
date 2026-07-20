@@ -20,6 +20,9 @@ public class Document {
 
     private String filePath; //Dosyanın sunucuda nerede bulunduğunu gösterir.
 
+    @Column(name = "original_file_name")
+    private String originalFileName;
+
     private LocalDateTime createdAt; //İlk oluşturulma zamanı.
 
     private LocalDateTime updatedAt; //Son güncelleme zamanı.
@@ -68,6 +71,14 @@ public class Document {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getOriginalFileName() {
+        return originalFileName;
+    }
+
+    public void setOriginalFileName(String originalFileName) {
+        this.originalFileName = originalFileName;
     }
 
     public String getFilePath() {

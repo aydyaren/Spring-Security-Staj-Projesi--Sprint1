@@ -23,7 +23,7 @@ public class FileStorageService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    public String saveFile(MultipartFile file) {
+    public FileStorageResult saveFile(MultipartFile file) {
 
         // Dosya yüklenmemişse hiçbir işlem yapma.
         if (file == null || file.isEmpty()) {
@@ -40,7 +40,7 @@ public class FileStorageService {
         try {
 
             // uploads klasörünü temsil eder.
-            Path uploadPath = Paths.get(uploadDir);
+            Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
 
             // Klasör yoksa oluştur.
             if (!Files.exists(uploadPath)) {
@@ -54,14 +54,19 @@ public class FileStorageService {
                 throw new InvalidFileException("File name not found.");
             }
 
+            // Path traversal koruması: client'ın gönderdiği isimde
+            // "../" veya klasör ayracı olsa bile sadece dosya adı kısmını alıyoruz.
+            // Örn: "../../etc/passwd.pdf" -> "passwd.pdf"
+            String safeOriginalFileName = Paths.get(originalFileName).getFileName().toString();
+
             // Uzantısız dosya yüklenmesini engelliyoruz.
-            if (!originalFileName.contains(".")) {
+            if (!safeOriginalFileName.contains(".")) {
                 throw new InvalidFileException("File extension not found.");
             }
 
             // Dosya uzantısını alıyoruz.
-            String extension = originalFileName
-                    .substring(originalFileName.lastIndexOf('.') + 1)
+            String extension = safeOriginalFileName
+                    .substring(safeOriginalFileName.lastIndexOf('.') + 1)
                     .toLowerCase();
 
             // Sadece bu uzantılara izin veriyoruz.
@@ -77,12 +82,18 @@ public class FileStorageService {
                 throw new InvalidFileException("Unsupported file type.");
             }
 
-            // Benzersiz dosya adı oluştur.
-            String uniqueFileName =
-                    UUID.randomUUID() + "-" + originalFileName;
+            // Diskte saklanacak isim SADECE UUID + uzantıdan oluşur.
+            // Orijinal dosya adı disk isminde asla kullanılmaz (path traversal / collision önlemi).
+            String storedFileName = UUID.randomUUID() + "." + extension;
 
             // Dosyanın kaydedileceği tam yolu oluştur.
-            Path targetLocation = uploadPath.resolve(uniqueFileName);
+            Path targetLocation = uploadPath.resolve(storedFileName).normalize();
+
+            // Ekstra güvenlik katmanı: normalize edilmiş hedefin hâlâ
+            // uploads klasörü içinde kaldığını doğruluyoruz.
+            if (!targetLocation.startsWith(uploadPath)) {
+                throw new InvalidFileException("Invalid file path.");
+            }
 
             // Dosyayı uploads klasörüne kopyala.
             Files.copy(
@@ -91,8 +102,8 @@ public class FileStorageService {
                     StandardCopyOption.REPLACE_EXISTING
             );
 
-            // Kaydedilen dosyanın adını döndür.
-            return uniqueFileName;
+            // Diskteki adı ve kullanıcıya gösterilecek orijinal adı birlikte döndür.
+            return new FileStorageResult(storedFileName, safeOriginalFileName);
 
         } catch (IOException e) {
             throw new RuntimeException("Could not store file.", e);

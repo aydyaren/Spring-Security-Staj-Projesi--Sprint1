@@ -2,6 +2,7 @@ package com.demo.sprintw1.service;
 
 import com.demo.sprintw1.dto.CreateDocumentRequest;
 import com.demo.sprintw1.dto.UpdateDocumentRequest;
+import com.demo.sprintw1.dto.response.DocumentDownloadResponse;
 import com.demo.sprintw1.dto.response.DocumentResponse;
 import com.demo.sprintw1.entity.Document;
 import com.demo.sprintw1.entity.User;
@@ -36,7 +37,8 @@ public class DocumentService {
 
         User owner = getCurrentUser(); //Giriş yapan kullanıcıyı alıyoruz.
 
-        String fileName = fileStorageService.saveFile(request.getFile()); //Dosyayı uploads klasörüne kaydediyoruz.
+        // Artık saveFile hem disk adını hem orijinal adı birlikte döndürüyor.
+        FileStorageResult storageResult = fileStorageService.saveFile(request.getFile());
 
         Document document = new Document();
 
@@ -44,10 +46,10 @@ public class DocumentService {
         document.setDescription(request.getDescription());
         document.setOwner(owner);
 
-        document.setFileName(fileName);
-
-        if (fileName != null) {
-            document.setFilePath("uploads/" + fileName);
+        if (storageResult != null) {
+            document.setFileName(storageResult.storedFileName());
+            document.setOriginalFileName(storageResult.originalFileName());
+            document.setFilePath("uploads/" + storageResult.storedFileName());
         }
 
         //Document'i veritabanına kaydediyoruz.
@@ -63,7 +65,7 @@ public class DocumentService {
 
         String role = currentUser.getRole().getName();
 
-        //ADMIN ve MANAGER bütün dokümanları görebilir.
+        //ADMIN ve MANAGER bütün dokümanları görebilir (admin dokümanları dahil).
         if (role.equals("ADMIN") || role.equals("MANAGER")) {
 
             return documentRepository.findAll()
@@ -89,8 +91,8 @@ public class DocumentService {
                         )
                 );
 
-        //Dokümanın sahibi mi diye kontrol ediyoruz.
-        checkOwnership(document);
+        //Görüntüleme yetkisi var mı kontrol ediyoruz (MANAGER admin dokümanını da görebilir).
+        checkViewPermission(document);
 
         return mapToResponse(document);
     }
@@ -105,8 +107,8 @@ public class DocumentService {
                         )
                 );
 
-        //Güncelleme yapmaya yetkisi var mı kontrol ediyoruz.
-        checkOwnership(document);
+        //Güncelleme yapmaya yetkisi var mı kontrol ediyoruz (MANAGER admin dokümanını düzenleyemez).
+        checkModifyPermission(document);
 
         //Sadece dolu gelen alanları güncelliyoruz.
         if (request.getTitle() != null) {
@@ -132,8 +134,8 @@ public class DocumentService {
                         )
                 );
 
-        //Silmeye yetkisi var mı kontrol ediyoruz.
-        checkOwnership(document);
+        //Silmeye yetkisi var mı kontrol ediyoruz (MANAGER admin dokümanını silemez).
+        checkModifyPermission(document);
 
         //Önce fiziksel dosyayı siliyoruz.
         fileStorageService.deleteFile(document.getFilePath());
@@ -142,7 +144,7 @@ public class DocumentService {
         documentRepository.delete(document);
     }
 
-    public Resource downloadDocument(Long id) {
+    public DocumentDownloadResponse downloadDocument(Long id) {
 
         //Veritabanından Document'i çekiyoruz.
         Document document = documentRepository.findById(id)
@@ -153,11 +155,14 @@ public class DocumentService {
                         )
                 );
 
-        //Dosyayı indirmeye yetkisi var mı kontrol ediyoruz.
-        checkOwnership(document);
+        //Dosyayı indirmeye yetkisi var mı kontrol ediyoruz (MANAGER admin dokümanını indiremez).
+        checkModifyPermission(document);
 
         //Dosyayı uploads klasöründen okuyup Controller'a gönderiyoruz.
-        return fileStorageService.loadFile(document.getFilePath());
+        Resource resource = fileStorageService.loadFile(document.getFilePath());
+
+        // Kullanıcıya gösterilecek orijinal dosya adını da birlikte döndürüyoruz.
+        return new DocumentDownloadResponse(resource, document.getOriginalFileName());
     }
 
     private User getCurrentUser() {
@@ -178,18 +183,57 @@ public class DocumentService {
                 );
     }
 
-    private void checkOwnership(Document document) {
+    // Sadece GÖRÜNTÜLEME için kullanılır: ADMIN ve MANAGER her dokümanı görebilir,
+    // admin dokümanları da dahil. EMPLOYEE sadece kendi dokümanını görebilir.
+    private void checkViewPermission(Document document) {
 
         User currentUser = getCurrentUser();
 
         String role = currentUser.getRole().getName();
 
-        //ADMIN ve MANAGER her dokümana erişebilir.
+        //ADMIN ve MANAGER her dokümanı görüntüleyebilir.
         if (role.equals("ADMIN") || role.equals("MANAGER")) {
             return;
         }
 
-        //EMPLOYEE sadece kendi dokümanına erişebilir.
+        //EMPLOYEE sadece kendi dokümanını görüntüleyebilir.
+        if (!document.getOwner().getId().equals(currentUser.getId())) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You are not allowed to access this document"
+            );
+        }
+    }
+
+    // İNDİRME / DÜZENLEME / SİLME için kullanılır: ADMIN her şeyi yapabilir,
+    // MANAGER admin dokümanları HARİÇ her şeyi yapabilir, EMPLOYEE sadece kendi dokümanında.
+    private void checkModifyPermission(Document document) {
+
+        User currentUser = getCurrentUser();
+
+        String role = currentUser.getRole().getName();
+        String ownerRole = document.getOwner().getRole().getName();
+
+        //ADMIN her dokümanı indirebilir/düzenleyebilir/silebilir.
+        if (role.equals("ADMIN")) {
+            return;
+        }
+
+        //MANAGER, ADMIN'e ait dokümanlar hariç indirebilir/düzenleyebilir/silebilir.
+        if (role.equals("MANAGER")) {
+
+            if (ownerRole.equals("ADMIN")) {
+                throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN,
+                        "Managers are not allowed to download, edit or delete admin documents"
+                );
+            }
+
+            return;
+        }
+
+        //EMPLOYEE sadece kendi dokümanını indirebilir/düzenleyebilir/silebilir.
         if (!document.getOwner().getId().equals(currentUser.getId())) {
 
             throw new ResponseStatusException(
