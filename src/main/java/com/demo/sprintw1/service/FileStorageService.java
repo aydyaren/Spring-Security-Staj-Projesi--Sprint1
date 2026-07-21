@@ -2,6 +2,7 @@ package com.demo.sprintw1.service;
 
 import com.demo.sprintw1.exception.InvalidFileException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,6 +17,7 @@ import java.util.UUID;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class FileStorageService {
@@ -121,7 +123,10 @@ public class FileStorageService {
 
             // File silindiyse 500 dönmemek için not found fırlatıyoruz.
             if (!resource.exists() || !resource.isReadable()) {
-                throw new RuntimeException("File not found.");
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "File not found."
+                );
             }
 
             // Service bu dosyayı Controller'a verebilir.
@@ -130,7 +135,11 @@ public class FileStorageService {
 
         } catch (MalformedURLException e) {
 
-            throw new RuntimeException("File not found.", e);
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "File not found.",
+                    e
+            );
 
         }
     }

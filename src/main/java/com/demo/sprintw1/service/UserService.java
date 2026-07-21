@@ -7,8 +7,10 @@ import com.demo.sprintw1.entity.Role;
 import com.demo.sprintw1.entity.User;
 import com.demo.sprintw1.repository.RoleRepository;
 import com.demo.sprintw1.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -34,10 +36,13 @@ public class UserService {
         // DTO'dan roleId alıyoruz.
         // RoleRepository ile veritabanında bu ID'yi arıyoruz.
         Role role = roleRepository.findById(request.getRoleId())
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Role not found"
+                ));
         /*
          Bulamazsak
-         .orElseThrow(() -> new RuntimeException("Role not found"));
+         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found"));
          çalışır ve kullanıcı oluşturulmaz.
          */
 
@@ -91,15 +96,19 @@ public class UserService {
     }
 
     public UserResponse updateUser(Long id, UpdateUserRequest request) {
-
-        // Güncellenecek kullanıcıyı veritabanında arıyoruz.
+// Güncellenecek kullanıcıyı veritabanında arıyoruz.
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
 
         // DTO'dan gelen roleId ile yeni rolü buluyoruz.
         Role role = roleRepository.findById(request.getRoleId())
-                .orElseThrow(() -> new RuntimeException("Role not found"));
-
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Role not found"
+                ));
         // Kullanıcının bilgilerini güncelliyoruz.
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
@@ -121,7 +130,10 @@ public class UserService {
     public void deleteUser(Long id) {
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
 
         userRepository.delete(user);
     }

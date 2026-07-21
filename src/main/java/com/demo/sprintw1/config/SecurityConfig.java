@@ -1,6 +1,8 @@
 package com.demo.sprintw1.config;
 
 
+import com.demo.sprintw1.security.CustomAccessDeniedHandler;
+import com.demo.sprintw1.security.CustomAuthenticationEntryPoint;
 import com.demo.sprintw1.security.JwtAuthenticationFilter;
 import com.demo.sprintw1.service.CustomUserDetailsService;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -25,8 +27,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
+                          CustomAccessDeniedHandler customAccessDeniedHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
     @Bean
@@ -37,10 +45,14 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
+
+
                 /*.authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() Gelen bütün HTTP isteklerine izin verir. Herkes bütün endpoint'lere
                         erişebilir. Bu yüzden
                 )*/
+
+                .cors(Customizer.withDefaults())
 
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -50,7 +62,8 @@ public class SecurityConfig {
                                 .requestMatchers(
                                         "/auth/login",
                                         "/swagger-ui/**",
-                                        "/v3/api-docs/**"
+                                        "/v3/api-docs/**",
+                                        "/error"
                                 ).permitAll() /*/auth/login endpoint'ine herkes erişebilir.Rol
                 kontrolleri login olduktan sonra yapılır.Bu endpoint'i korusaydık kullanıcının login yapması mümkün
                 olmazdı.Token kısmına loginden sonra ihtiyacımız var.*/
@@ -59,6 +72,13 @@ public class SecurityConfig {
                         //Bunun dışındaki bütün endpoint'ler için kullanıcı giriş yapmış olmalı.
                 )
                 //Burada henüz ; ADMIN , MANAGER ,EMPLOYEE yok.Sadece: "Login olmuş mu?" sorusuna bakıyor.
+
+
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                )
+
 
                 .addFilterBefore( //Önce filter ekleyip sonra passworde geçilmeli.
                         jwtAuthenticationFilter,
