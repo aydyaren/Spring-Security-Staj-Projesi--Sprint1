@@ -1,22 +1,16 @@
 package com.demo.sprintw1.service;
 
+import com.demo.sprintw1.audit.AuditAction;
+import com.demo.sprintw1.audit.AuditResource;
 import com.demo.sprintw1.dto.request.LoginRequest;
+import com.demo.sprintw1.dto.response.AuthenticationResult;
+import com.demo.sprintw1.entity.RefreshToken;
+import com.demo.sprintw1.entity.User;
 import com.demo.sprintw1.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.stereotype.Service;
-
-import com.demo.sprintw1.dto.response.AuthResponse;
-import com.demo.sprintw1.dto.response.AuthenticationResult;
-import com.demo.sprintw1.service.RefreshTokenService;
-
-import com.demo.sprintw1.entity.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
-
-import com.demo.sprintw1.entity.RefreshToken;
-
-
+import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService { //Dependency Injection
@@ -29,18 +23,22 @@ public class AuthService { //Dependency Injection
 
     private final RefreshTokenService refreshTokenService;
 
+    private final AuditLogService auditLogService;
+
     public AuthService(AuthenticationManager authenticationManager,
                        UserRepository userRepository,
                        JwtService jwtService,
-                       RefreshTokenService refreshTokenService) {
+                       RefreshTokenService refreshTokenService,
+                       AuditLogService auditLogService) {
 
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
+        this.auditLogService = auditLogService;
     }
 
-    public AuthenticationResult login(LoginRequest request)  {
+    public AuthenticationResult login(LoginRequest request) {
 
         /*
          Kullanıcı login alanına ister e-mail ister username yazabilir.
@@ -73,6 +71,14 @@ public class AuthService { //Dependency Injection
         // Refresh Token oluşturulur.
         String refreshToken = refreshTokenService.createRefreshToken(user);
 
+        // Login işlemini audit tablosuna kaydet.
+        auditLogService.saveLog(
+                user.getEmail(),
+                AuditAction.LOGIN,
+                AuditResource.AUTH,
+                null
+        );
+
         // Access Token ve Refresh Token Controller'a gönderilir.
         return new AuthenticationResult(accessToken, refreshToken);
     }
@@ -104,6 +110,14 @@ public class AuthService { //Dependency Injection
         String newRefreshToken =
                 refreshTokenService.createRefreshToken(user);
 
+        // Refresh Token işlemini audit tablosuna kaydet.
+        auditLogService.saveLog(
+                user.getEmail(),
+                AuditAction.REFRESH_TOKEN,
+                AuditResource.AUTH,
+                null
+        );
+
         // Yeni tokenlar Controller'a gönderilir.
         return new AuthenticationResult(accessToken, newRefreshToken);
     }
@@ -116,33 +130,14 @@ public class AuthService { //Dependency Injection
         refreshTokenService.validateRefreshToken(refreshToken);
 
         refreshTokenService.revokeToken(refreshToken);
+
+        // Logout işlemini audit tablosuna kaydet.
+        auditLogService.saveLog(
+                refreshToken.getUser().getEmail(),
+                AuditAction.LOGOUT,
+                AuditResource.AUTH,
+                null
+        );
     }
 
 }
-
-/*
-new UsernamePasswordAuthenticationToken(...)
-Aslında JWT ile alakası yok.Bu sadece Spring Security'ye bilgi taşıyan bir nesne.İçinde şunlar var:
-
-email
-password
-
-Yani biz Spring'e küçük bir paket veriyoruz.Diyoruz ki:Al, kullanıcının girdiği bilgiler bunlar.
- */
-
-/*
-AuthService'de bu satırı yazdık:
-
-authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(
-                user.getEmail(),
-                request.getPassword()
-        )
-);
-
-Ama bu metodu çağıran kimse yok. Yani şu an Postman'den: POST /login atarsak
-
-Böyle bir endpoint yok.
-
-çünkü henüz AuthController yazmadık.
-*/

@@ -106,7 +106,7 @@ public class GlobalExceptionHandler {
 
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.UNAUTHORIZED.value(),
-                "Invalid email or password."
+                "Invalid login credentials."
         );
 
         return ResponseEntity
@@ -141,7 +141,7 @@ public class GlobalExceptionHandler {
             InvalidRefreshTokenException ex) {
 
         System.out.println(">>> InvalidRefreshTokenException HANDLER CALLED <<<");
-        
+
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.UNAUTHORIZED.value(),
                 ex.getMessage()

@@ -1,5 +1,7 @@
 package com.demo.sprintw1.service;
 
+import com.demo.sprintw1.audit.AuditAction;
+import com.demo.sprintw1.audit.AuditResource;
 import com.demo.sprintw1.dto.request.CreateDocumentRequest;
 import com.demo.sprintw1.dto.request.UpdateDocumentRequest;
 import com.demo.sprintw1.dto.response.DocumentDownloadResponse;
@@ -23,14 +25,17 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final AuditLogService auditLogService;
 
     public DocumentService(DocumentRepository documentRepository,
                            UserRepository userRepository,
-                           FileStorageService fileStorageService) {
+                           FileStorageService fileStorageService,
+                           AuditLogService auditLogService) {
 
         this.documentRepository = documentRepository;
         this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
+        this.auditLogService = auditLogService;
     }
 
     public DocumentResponse createDocument(CreateDocumentRequest request) {
@@ -54,6 +59,13 @@ public class DocumentService {
 
         //Document'i veritabanına kaydediyoruz.
         Document savedDocument = documentRepository.save(document);
+
+        // Document oluşturma işlemini audit tablosuna kaydet.
+        auditLogService.saveLog(
+                AuditAction.CREATE_DOCUMENT,
+                AuditResource.DOCUMENT,
+                savedDocument.getId()
+        );
 
         //Entity yerine DTO döndürüyoruz.
         return mapToResponse(savedDocument);
@@ -121,6 +133,13 @@ public class DocumentService {
 
         Document updatedDocument = documentRepository.save(document);
 
+        // Document güncelleme işlemini audit tablosuna kaydet.
+        auditLogService.saveLog(
+                AuditAction.UPDATE_DOCUMENT,
+                AuditResource.DOCUMENT,
+                updatedDocument.getId()
+        );
+
         return mapToResponse(updatedDocument);
     }
 
@@ -139,6 +158,13 @@ public class DocumentService {
 
         //Önce fiziksel dosyayı siliyoruz.
         fileStorageService.deleteFile(document.getFilePath());
+
+        // Document silme işlemini audit tablosuna kaydet.
+        auditLogService.saveLog(
+                AuditAction.DELETE_DOCUMENT,
+                AuditResource.DOCUMENT,
+                document.getId()
+        );
 
         //Sonra veritabanındaki kaydı siliyoruz.
         documentRepository.delete(document);
@@ -160,6 +186,13 @@ public class DocumentService {
 
         //Dosyayı uploads klasöründen okuyup Controller'a gönderiyoruz.
         Resource resource = fileStorageService.loadFile(document.getFilePath());
+
+        // Document indirme işlemini audit tablosuna kaydet.
+        auditLogService.saveLog(
+                AuditAction.DOWNLOAD_DOCUMENT,
+                AuditResource.DOCUMENT,
+                document.getId()
+        );
 
         // Kullanıcıya gösterilecek orijinal dosya adını da birlikte döndürüyoruz.
         return new DocumentDownloadResponse(resource, document.getOriginalFileName());
@@ -226,7 +259,7 @@ public class DocumentService {
             if (ownerRole.equals("ADMIN")) {
                 throw new ResponseStatusException(
                         HttpStatus.FORBIDDEN,
-                        "Managers are not allowed to download, edit or delete admin documents"
+                        "You are not allowed to access this document"
                 );
             }
 

@@ -1,19 +1,14 @@
 package com.demo.sprintw1.controller;
 
 import com.demo.sprintw1.dto.request.LoginRequest;
-import com.demo.sprintw1.dto.request.LogoutRequest;
 import com.demo.sprintw1.dto.response.AuthResponse;
+import com.demo.sprintw1.dto.response.AuthenticationResult;
 import com.demo.sprintw1.exception.InvalidRefreshTokenException;
 import com.demo.sprintw1.service.AuthService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-
-import com.demo.sprintw1.dto.response.AuthenticationResult;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
-import org.springframework.web.bind.annotation.CookieValue;
-
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -29,9 +24,11 @@ public class AuthController {
      * Kullanıcı giriş işlemini gerçekleştirir.Başarılı olursa Access Token ve Refresh Token döndürür.
      */
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(
+            @RequestBody LoginRequest request) {
 
-        AuthenticationResult result = authService.login(request);
+        AuthenticationResult result =
+                authService.login(request);
 
         ResponseCookie refreshCookie = ResponseCookie.from(
                         "refreshToken",
@@ -50,6 +47,7 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                 .body(response);
     }
+
     /*
      Geçerli bir Refresh Token kullanarak yeni Access Token ve Refresh Token üretir.
      */
@@ -77,8 +75,7 @@ public class AuthController {
                 .sameSite("Strict")
                 .build();
 
-        AuthResponse response =
-                new AuthResponse(result.getAccessToken());
+        AuthResponse response = new AuthResponse(result.getAccessToken());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
@@ -103,4 +100,5 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
                 .build();
     }
+
 }
