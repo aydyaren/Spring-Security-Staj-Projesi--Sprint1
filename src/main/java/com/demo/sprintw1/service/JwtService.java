@@ -25,6 +25,7 @@ public class JwtService {
     // Token geçerlilik süresi de application.properties'ten okunuyor.
     private final long expirationMs;
 
+
     public JwtService(
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration-ms}") long expirationMs) {

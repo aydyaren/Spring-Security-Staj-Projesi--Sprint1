@@ -1,7 +1,7 @@
 package com.demo.sprintw1.service;
 
-import com.demo.sprintw1.dto.CreateUserRequest;
-import com.demo.sprintw1.dto.UpdateUserRequest;
+import com.demo.sprintw1.dto.request.CreateUserRequest;
+import com.demo.sprintw1.dto.request.UpdateUserRequest;
 import com.demo.sprintw1.dto.response.UserResponse;
 import com.demo.sprintw1.entity.Role;
 import com.demo.sprintw1.entity.User;

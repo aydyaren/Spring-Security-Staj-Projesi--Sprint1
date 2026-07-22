@@ -1,4 +1,4 @@
-package com.demo.sprintw1.dto;
+package com.demo.sprintw1.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 

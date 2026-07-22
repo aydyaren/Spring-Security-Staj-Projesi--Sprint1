@@ -11,6 +11,10 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 
+import com.demo.sprintw1.exception.InvalidRefreshTokenException;
+import com.demo.sprintw1.exception.RefreshTokenExpiredException;
+import com.demo.sprintw1.exception.RefreshTokenRevokedException;
+
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.LocalDateTime;
@@ -128,6 +132,60 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(error);
     }
+
+    /*
+     * Refresh Token veritabanında bulunamadığında çalışır.
+     */
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRefreshTokenException(
+            InvalidRefreshTokenException ex) {
+
+        System.out.println(">>> InvalidRefreshTokenException HANDLER CALLED <<<");
+        
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(error);
+    }
+
+    /*
+     * Refresh Token'ın süresi dolduğunda çalışır.
+     */
+    @ExceptionHandler(RefreshTokenExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleRefreshTokenExpiredException(
+            RefreshTokenExpiredException ex) {
+
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(error);
+    }
+
+    /*
+     * İptal edilmiş Refresh Token tekrar kullanılmak istendiğinde çalışır.
+     */
+    @ExceptionHandler(RefreshTokenRevokedException.class)
+    public ResponseEntity<ErrorResponse> handleRefreshTokenRevokedException(
+            RefreshTokenRevokedException ex) {
+
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(error);
+    }
+
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(

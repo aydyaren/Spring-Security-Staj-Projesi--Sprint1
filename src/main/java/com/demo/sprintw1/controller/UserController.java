@@ -1,7 +1,7 @@
 package com.demo.sprintw1.controller;
 
-import com.demo.sprintw1.dto.CreateUserRequest;
-import com.demo.sprintw1.dto.UpdateUserRequest;
+import com.demo.sprintw1.dto.request.CreateUserRequest;
+import com.demo.sprintw1.dto.request.UpdateUserRequest;
 import com.demo.sprintw1.dto.response.UserResponse;
 import com.demo.sprintw1.service.UserService;
 import org.springframework.http.ResponseEntity;

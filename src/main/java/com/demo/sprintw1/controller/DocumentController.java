@@ -1,7 +1,7 @@
 package com.demo.sprintw1.controller;
 
-import com.demo.sprintw1.dto.CreateDocumentRequest;
-import com.demo.sprintw1.dto.UpdateDocumentRequest;
+import com.demo.sprintw1.dto.request.CreateDocumentRequest;
+import com.demo.sprintw1.dto.request.UpdateDocumentRequest;
 import com.demo.sprintw1.service.DocumentService;
 
 import jakarta.validation.Valid;

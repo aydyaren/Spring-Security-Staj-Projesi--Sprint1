@@ -1,7 +1,7 @@
 package com.demo.sprintw1.service;
 
-import com.demo.sprintw1.dto.CreateDocumentRequest;
-import com.demo.sprintw1.dto.UpdateDocumentRequest;
+import com.demo.sprintw1.dto.request.CreateDocumentRequest;
+import com.demo.sprintw1.dto.request.UpdateDocumentRequest;
 import com.demo.sprintw1.dto.response.DocumentDownloadResponse;
 import com.demo.sprintw1.dto.response.DocumentResponse;
 import com.demo.sprintw1.entity.Document;
