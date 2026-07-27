@@ -84,7 +84,12 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
-            @CookieValue("refreshToken") String refreshToken) {
+            @CookieValue(value = "refreshToken", required = false)
+            String refreshToken) {
+
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new InvalidRefreshTokenException("Refresh Token is missing.");
+        }
 
         authService.logout(refreshToken);
 

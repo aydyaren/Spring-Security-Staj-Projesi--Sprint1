@@ -20,6 +20,8 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     // Sadece iptal edilmemiş Refresh Token'ı getirir.
     Optional<RefreshToken> findByTokenHashAndRevokedFalse(String tokenHash);
 
+    // Kullanıcıya ait bütün Refresh Token kayıtlarını siler.
+    void deleteByUser(User user);
 
 
 }

@@ -3,8 +3,10 @@ package com.demo.sprintw1.service;
 import com.demo.sprintw1.dto.request.CreateUserRequest;
 import com.demo.sprintw1.dto.request.UpdateUserRequest;
 import com.demo.sprintw1.dto.response.UserResponse;
+import com.demo.sprintw1.entity.RefreshToken;
 import com.demo.sprintw1.entity.Role;
 import com.demo.sprintw1.entity.User;
+import com.demo.sprintw1.repository.RefreshTokenRepository;
 import com.demo.sprintw1.repository.RoleRepository;
 import com.demo.sprintw1.repository.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -13,26 +15,41 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-
+import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     // Constructor Dependency Injection:
     public UserService(UserRepository userRepository,
                        RoleRepository roleRepository,
-                       PasswordEncoder passwordEncoder) {
+                       PasswordEncoder passwordEncoder,
+                       RefreshTokenRepository refreshTokenRepository) {
 
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     public UserResponse createUser(CreateUserRequest request) {
 
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Email already exists."
+            );
+        }
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Username already exists."
+            );
+        }
         // DTO'dan roleId alıyoruz.
         // RoleRepository ile veritabanında bu ID'yi arıyoruz.
         Role role = roleRepository.findById(request.getRoleId())
@@ -94,14 +111,52 @@ public class UserService {
                 .map(this::mapToResponse)
                 .toList();
     }
+    /*
+    ID'ye göre tek bir kullanıcıyı getirir.
+     Kullanıcı bulunamazsa 404 döndürür.
+    */
+    public UserResponse getUserById(Long id) {
+
+        User user = userRepository.findByIdWithRole(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
+
+        return mapToResponse(user);
+    }
+
 
     public UserResponse updateUser(Long id, UpdateUserRequest request) {
-// Güncellenecek kullanıcıyı veritabanında arıyoruz.
+
+        // Güncellenecek kullanıcıyı veritabanında arıyoruz.
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "User not found"
                 ));
+
+        // Email başka bir kullanıcı tarafından kullanılıyor mu?
+        userRepository.findByEmail(request.getEmail())
+                .ifPresent(existingUser -> {
+                    if (!existingUser.getId().equals(id)) {
+                        throw new ResponseStatusException(
+                                HttpStatus.CONFLICT,
+                                "Email already exists."
+                        );
+                    }
+                });
+
+        // Username başka bir kullanıcı tarafından kullanılıyor mu?
+        userRepository.findByUsername(request.getUsername())
+                .ifPresent(existingUser -> {
+                    if (!existingUser.getId().equals(id)) {
+                        throw new ResponseStatusException(
+                                HttpStatus.CONFLICT,
+                                "Username already exists."
+                        );
+                    }
+                });
 
         // DTO'dan gelen roleId ile yeni rolü buluyoruz.
         Role role = roleRepository.findById(request.getRoleId())
@@ -109,6 +164,7 @@ public class UserService {
                         HttpStatus.NOT_FOUND,
                         "Role not found"
                 ));
+
         // Kullanıcının bilgilerini güncelliyoruz.
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
@@ -127,7 +183,15 @@ public class UserService {
     Kullanıcıyı ID'ye göre siler.
      Kullanıcı bulunamazsa hata fırlatır.
     */
+   /*
+ Kullanıcıyı ID'ye göre siler.
+ Önce kullanıcıya ait Refresh Token kayıtlarını siler.
+ Daha sonra kullanıcıyı veritabanından kaldırır.
+*/
+    @Transactional
     public void deleteUser(Long id) {
+
+        System.out.println("******** DELETE USER CALLED ********");
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -135,7 +199,28 @@ public class UserService {
                         "User not found"
                 ));
 
+        List<RefreshToken> tokens = refreshTokenRepository.findByUser(user);
+
+        System.out.println("Token sayısı = " + tokens.size());
+
+        refreshTokenRepository.deleteAll(tokens);
+
+        System.out.println("Tokenlar silindi.");
+
         userRepository.delete(user);
     }
+    /*
+    Giriş yapan kullanıcının kendi profil bilgilerini döndürür.
+    JWT içerisindeki email bilgisi kullanılarak kullanıcı bulunur.
+    */
+    public UserResponse getMyProfile(String email) {
 
+        User user = userRepository.findByEmailWithRole(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
+
+        return mapToResponse(user);
+    }
 }

@@ -16,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.demo.sprintw1.security.RateLimitFilter;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -28,10 +29,13 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final RateLimitFilter rateLimitFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, RateLimitFilter rateLimitFilter,
+                          CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
                           CustomAccessDeniedHandler customAccessDeniedHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.rateLimitFilter = rateLimitFilter;
         this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
         this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
@@ -81,12 +85,17 @@ public class SecurityConfig {
                 )
 
 
-                .addFilterBefore( //Önce filter ekleyip sonra passworde geçilmeli.
-                        jwtAuthenticationFilter,
+                // Login isteklerini önce RateLimitFilter ile kontrol ediyoruz.
+                .addFilterBefore(
+                        rateLimitFilter,
                         UsernamePasswordAuthenticationFilter.class
-                        //Benim filter'ımı UsernamePasswordAuthenticationFilter'dan hemen önce çalıştır.
-                );
+                )
 
+                // RateLimit kontrolünden geçen isteklerde JWT doğrulaması yapıyoruz.
+                .addFilterAfter(
+                        jwtAuthenticationFilter,
+                        RateLimitFilter.class
+                );
 
 
                 //.httpBasic(Customizer.withDefaults());

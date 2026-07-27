@@ -71,11 +71,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleValidationException(
             MethodArgumentNotValidException ex) {
 
+        String message = ex.getBindingResult()
+                .getFieldError()
+                .getDefaultMessage();
+
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
-                "Validation failed"
+                message
         );
-
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(error);
@@ -123,16 +126,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex) {
 
+        ex.printStackTrace(); // Docker loglarına gerçek hatayı yazdır
+
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Unexpected error occurred."
+                ex.getMessage()
         );
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(error);
     }
-
     /*
      * Refresh Token veritabanında bulunamadığında çalışır.
      */
@@ -199,5 +203,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(error);
+    }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ErrorResponse> handleTooManyRequests(
+            TooManyRequestsException ex) {
+
+        ErrorResponse errorResponse =
+                new ErrorResponse(
+                        HttpStatus.TOO_MANY_REQUESTS.value(),
+                        ex.getMessage()
+                );
+
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", "60")
+                .body(errorResponse);
     }
 }

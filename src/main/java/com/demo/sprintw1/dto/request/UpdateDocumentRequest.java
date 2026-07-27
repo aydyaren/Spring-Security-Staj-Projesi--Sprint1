@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 
 public class UpdateDocumentRequest {
 
-    @NotBlank(message = "Title boş olamaz")
+    @NotBlank(message = "Title cannot be blank.")
     private String title;
 
     private String description;

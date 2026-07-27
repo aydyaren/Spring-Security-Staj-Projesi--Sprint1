@@ -13,32 +13,45 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthService { //Dependency Injection
+public class AuthService {
 
+    // Spring Security AuthenticationManager
     private final AuthenticationManager authenticationManager;
 
+    // Kullanıcı işlemleri
     private final UserRepository userRepository;
 
+    // JWT işlemleri
     private final JwtService jwtService;
 
+    // Refresh Token işlemleri
     private final RefreshTokenService refreshTokenService;
 
+    // Audit Log işlemleri
     private final AuditLogService auditLogService;
+
+    // Login Rate Limit işlemleri
+    private final LoginRateLimitService loginRateLimitService;
 
     public AuthService(AuthenticationManager authenticationManager,
                        UserRepository userRepository,
                        JwtService jwtService,
                        RefreshTokenService refreshTokenService,
+                       LoginRateLimitService loginRateLimitService,
                        AuditLogService auditLogService) {
 
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
+        this.loginRateLimitService = loginRateLimitService;
         this.auditLogService = auditLogService;
     }
 
     public AuthenticationResult login(LoginRequest request) {
+
+        // Login (username veya e-mail) için rate limit kontrolü yapıyoruz.
+        loginRateLimitService.checkLoginLimit(request.getLogin());
 
         /*
          Kullanıcı login alanına ister e-mail ister username yazabilir.
@@ -47,20 +60,16 @@ public class AuthService { //Dependency Injection
         User user = userRepository
                 .findByEmailOrUsername(request.getLogin(), request.getLogin())
                 /*
-                Doğrulanmış kullanıcıyı veritabanından alıyoruz.
-                Neden? Çünkü JWT'nin içine koyacağımız:
-                email, role gibi bilgiler User nesnesinde var.
+                 Doğrulanmış kullanıcıyı veritabanından alıyoruz.
+                 Çünkü JWT'nin içine koyacağımız email, role gibi bilgiler
+                 User nesnesinde bulunuyor.
                  */
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+        // Spring Security ile kullanıcı doğrulaması yapıyoruz.
         authenticationManager.authenticate(
-                /*Spring Security, bu kullanıcının giriş yapmasını dene.
-                Yani login işlemini başlatıyoruz.
-                Email ve şifreyi kontrol eder.
-                Yanlışsa burada exception fırlatır ve metodun
-                geri kalanı çalışmaz.*/
                 new UsernamePasswordAuthenticationToken(
-                        user.getEmail(),      // Spring Security mevcut yapıda email ile çalışıyor.
+                        user.getEmail(),
                         request.getPassword()
                 )
         );
@@ -118,7 +127,7 @@ public class AuthService { //Dependency Injection
                 null
         );
 
-        // Yeni tokenlar Controller'a gönderilir.
+        // Yeni tokenları Controller'a gönder.
         return new AuthenticationResult(accessToken, newRefreshToken);
     }
 
@@ -139,5 +148,4 @@ public class AuthService { //Dependency Injection
                 null
         );
     }
-
 }
