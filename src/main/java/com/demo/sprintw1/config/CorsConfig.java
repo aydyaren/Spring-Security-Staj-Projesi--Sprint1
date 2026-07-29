@@ -19,7 +19,9 @@ public class CorsConfig {
         // Frontend'in çalışacağı adresler.
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "http://localhost:5173"
+                "http://localhost:5173",
+                "http://localhost:5174"
+
         ));
 
         // İzin verilen HTTP metodları.

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import com.demo.sprintw1.exception.RoleNotFoundException;
 
 @Component
 public class AdminInitializer implements CommandLineRunner {
@@ -44,10 +45,12 @@ public class AdminInitializer implements CommandLineRunner {
             return;
         }
 
-        // ADMIN rolünü veritabanından al.
-        Role adminRole = roleRepository.findByName("ADMIN")
-                .orElseThrow(() -> new RuntimeException("ADMIN role not found"));
+        Role adminRole = roleRepository.findByName("ADMIN").orElse(null);
 
+        if (adminRole == null) {
+            log.error("ADMIN role not found. Default admin user was not created.");
+            return;
+        }
         User admin = new User();
 
         admin.setFirstName("System");

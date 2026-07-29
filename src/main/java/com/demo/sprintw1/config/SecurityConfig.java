@@ -73,9 +73,10 @@ public class SecurityConfig {
                 kontrolleri login olduktan sonra yapılır.Bu endpoint'i korusaydık kullanıcının login yapması mümkün
                 olmazdı.Token kısmına loginden sonra ihtiyacımız var.*/
 
-                        .anyRequest().authenticated()
+                                .anyRequest().authenticated()
                         //Bunun dışındaki bütün endpoint'ler için kullanıcı giriş yapmış olmalı.
                 )
+
                 //Burada henüz ; ADMIN , MANAGER ,EMPLOYEE yok.Sadece: "Login olmuş mu?" sorusuna bakıyor.
 
 
@@ -83,7 +84,6 @@ public class SecurityConfig {
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
-
 
                 // Login isteklerini önce RateLimitFilter ile kontrol ediyoruz.
                 .addFilterBefore(

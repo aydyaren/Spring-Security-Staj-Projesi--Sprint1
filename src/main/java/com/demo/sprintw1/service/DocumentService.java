@@ -119,21 +119,41 @@ public class DocumentService {
                         )
                 );
 
-        //Güncelleme yapmaya yetkisi var mı kontrol ediyoruz (MANAGER admin dokümanını düzenleyemez).
+        // Güncelleme yetkisi kontrolü.
         checkModifyPermission(document);
 
-        //Sadece dolu gelen alanları güncelliyoruz.
+        // Başlığı güncelle.
         if (request.getTitle() != null) {
             document.setTitle(request.getTitle());
         }
 
+        // Açıklamayı güncelle.
         if (request.getDescription() != null) {
             document.setDescription(request.getDescription());
         }
 
+        // Yeni dosya gönderildiyse eski dosyayı değiştir.
+        if (request.getFile() != null && !request.getFile().isEmpty()) {
+
+            // Eski fiziksel dosyayı sil.
+            fileStorageService.deleteFile(document.getFilePath());
+
+            // Yeni dosyayı kaydet.
+            FileStorageResult storageResult =
+                    fileStorageService.saveFile(request.getFile());
+
+            // Veritabanındaki bilgileri güncelle.
+            document.setFileName(storageResult.storedFileName());
+
+            document.setOriginalFileName(storageResult.originalFileName());
+
+            document.setFilePath("uploads/" + storageResult.storedFileName());
+        }
+
+        // Veritabanına kaydet.
         Document updatedDocument = documentRepository.save(document);
 
-        // Document güncelleme işlemini audit tablosuna kaydet.
+        // Audit Log.
         auditLogService.saveLog(
                 AuditAction.UPDATE_DOCUMENT,
                 AuditResource.DOCUMENT,

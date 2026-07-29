@@ -12,6 +12,10 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
 
     List<Document> findByOwner(User owner);
 
+    boolean existsByOwner(User owner);
+
+    void deleteAllByOwner(User owner);
+
 }
 
 

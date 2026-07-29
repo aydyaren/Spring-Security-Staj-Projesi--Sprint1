@@ -1,18 +1,15 @@
-version: '3.8'
-
 services:
-
   # PostgreSQL veritabanı servisi
   postgres:
     image: postgres:16
-    container_name: sprintw1-postgres
+    container_name: sprintw1-postgres-8082
     restart: unless-stopped
     environment:
-      POSTGRES_DB: sprint1_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: intren13
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -20,11 +17,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
   # Spring Boot uygulaması
   app:
     build: .
-    container_name: sprintw1-app
+    container_name: sprintw1-app-8082
     restart: unless-stopped
     depends_on:
       postgres:
@@ -35,18 +31,15 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
-
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
       JWT_REFRESH_EXPIRATION_DAYS: ${JWT_REFRESH_EXPIRATION_DAYS}
-
       DEFAULT_ADMIN_EMAIL: ${DEFAULT_ADMIN_EMAIL}
       DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD}
     ports:
-      - "8080:8080"
+      - "8082:8080"
     volumes:
-      - uploads_data:/app/uploads   # dosya yüklemeleri container silinse bile kalıcı olsun
-
+      - uploads_data:/app/uploads
 volumes:
   postgres_data:
   uploads_data:

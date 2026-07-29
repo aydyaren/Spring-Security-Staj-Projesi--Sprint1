@@ -220,4 +220,21 @@ public class GlobalExceptionHandler {
                 .header("Retry-After", "60")
                 .body(errorResponse);
     }
+
+    // Kullanıcının sahip olduğu belgeler varsa çalışır.
+    @ExceptionHandler(UserHasDocumentsException.class)
+    public ResponseEntity<ErrorResponse> handleUserHasDocumentsException(
+            UserHasDocumentsException ex) {
+
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(error);
+    }
+
+
 }

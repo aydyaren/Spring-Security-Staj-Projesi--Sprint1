@@ -27,6 +27,9 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(
             @RequestBody LoginRequest request) {
 
+        System.out.println("LOGIN ENDPOINT CALLED");
+        System.out.println(request.getLogin());
+
         AuthenticationResult result =
                 authService.login(request);
 

@@ -1,6 +1,7 @@
 package com.demo.sprintw1.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.web.multipart.MultipartFile;
 
 public class UpdateDocumentRequest {
 
@@ -8,6 +9,9 @@ public class UpdateDocumentRequest {
     private String title;
 
     private String description;
+
+    // Yeni seçilen dosya.
+    private MultipartFile file;
 
     public UpdateDocumentRequest() {
     }
@@ -26,5 +30,13 @@ public class UpdateDocumentRequest {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public MultipartFile getFile() {
+        return file;
+    }
+
+    public void setFile(MultipartFile file) {
+        this.file = file;
     }
 }

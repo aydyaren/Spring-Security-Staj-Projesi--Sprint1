@@ -6,6 +6,8 @@ import com.demo.sprintw1.dto.response.UserResponse;
 import com.demo.sprintw1.entity.RefreshToken;
 import com.demo.sprintw1.entity.Role;
 import com.demo.sprintw1.entity.User;
+import com.demo.sprintw1.exception.UserHasDocumentsException;
+import com.demo.sprintw1.repository.DocumentRepository;
 import com.demo.sprintw1.repository.RefreshTokenRepository;
 import com.demo.sprintw1.repository.RoleRepository;
 import com.demo.sprintw1.repository.UserRepository;
@@ -23,17 +25,20 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final DocumentRepository documentRepository;
 
     // Constructor Dependency Injection:
     public UserService(UserRepository userRepository,
                        RoleRepository roleRepository,
                        PasswordEncoder passwordEncoder,
-                       RefreshTokenRepository refreshTokenRepository) {
+                       RefreshTokenRepository refreshTokenRepository,
+                       DocumentRepository documentRepository) {
 
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.documentRepository = documentRepository;
     }
 
     public UserResponse createUser(CreateUserRequest request) {
@@ -184,12 +189,14 @@ public class UserService {
      Kullanıcı bulunamazsa hata fırlatır.
     */
    /*
+ /*
  Kullanıcıyı ID'ye göre siler.
- Önce kullanıcıya ait Refresh Token kayıtlarını siler.
- Daha sonra kullanıcıyı veritabanından kaldırır.
+ Önce kullanıcıya ait belge olup olmadığını kontrol eder.
+ Belge varsa kullanıcı silinmez.
+ Refresh Token kayıtları silindikten sonra kullanıcı kaldırılır.
 */
     @Transactional
-    public void deleteUser(Long id) {
+    public void deleteUser(Long id, boolean force) {
 
         System.out.println("******** DELETE USER CALLED ********");
 
@@ -199,20 +206,47 @@ public class UserService {
                         "User not found"
                 ));
 
+        // Kullanıcının sahip olduğu belge var mı kontrol eder.
+        if (documentRepository.existsByOwner(user)) {
+
+            // Zorla silme istenmediyse kullanıcıyı uyarır.
+            if (!force) {
+
+                throw new UserHasDocumentsException(
+                        "This user owns documents. Deleting this user will also delete all owned documents."
+                );
+
+            }
+
+            // Kullanıcının bütün belgelerini siler.
+            documentRepository.deleteAllByOwner(user);
+
+            // Belgeleri gerçekten sildi mi kontrol eder.
+            System.out.println("Belge sayısı: " + documentRepository.findByOwner(user).size());
+
+            // Belgelerin silinmesini hemen veritabanına yazar.
+            documentRepository.flush();
+
+        }
+
+        // Kullanıcıya ait Refresh Token kayıtlarını getirir.
         List<RefreshToken> tokens = refreshTokenRepository.findByUser(user);
 
         System.out.println("Token sayısı = " + tokens.size());
 
+        // Refresh Token kayıtlarını siler.
         refreshTokenRepository.deleteAll(tokens);
 
         System.out.println("Tokenlar silindi.");
 
+        // Kullanıcıyı veritabanından siler.
         userRepository.delete(user);
+
     }
     /*
-    Giriş yapan kullanıcının kendi profil bilgilerini döndürür.
-    JWT içerisindeki email bilgisi kullanılarak kullanıcı bulunur.
-    */
+ Giriş yapan kullanıcının kendi profil bilgilerini döndürür.
+ JWT içerisindeki email bilgisi kullanılarak kullanıcı bulunur.
+*/
     public UserResponse getMyProfile(String email) {
 
         User user = userRepository.findByEmailWithRole(email)
@@ -223,4 +257,5 @@ public class UserService {
 
         return mapToResponse(user);
     }
+
 }
