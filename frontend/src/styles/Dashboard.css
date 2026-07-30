@@ -1,0 +1,171 @@
+/* ===========================================================
+   DASHBOARD
+=========================================================== */
+
+.dashboard{
+
+    display:flex;
+
+    min-height:100vh;
+
+    background:#F7F8FC;
+
+}
+
+/* Sağ içerik */
+
+.dashboard-content{
+
+    flex:1;
+
+    margin-left:260px;
+
+    padding:40px;
+
+}
+
+/* Hero */
+
+.hero{
+
+    background:linear-gradient(
+            135deg,
+            #882078,
+            #307DBB
+    );
+
+    color:white;
+
+    padding:40px;
+
+    border-radius:20px;
+
+    margin-bottom:35px;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.12);
+
+}
+
+.hero h1{
+
+    font-size:34px;
+
+    margin-bottom:12px;
+
+}
+
+.hero p{
+
+    font-size:16px;
+
+    opacity:.95;
+
+}
+
+/* Kartlar */
+
+.dashboard-cards{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+
+    gap:25px;
+
+}
+
+/* Kart */
+
+.dashboard-card{
+
+    background:white;
+
+    border-radius:18px;
+
+    padding:28px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+/* Hover */
+
+.dashboard-card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:0 18px 40px rgba(0,0,0,.15);
+
+}
+
+/* Kart Başlığı */
+
+.card-title{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin-bottom:15px;
+
+    color:#22243A;
+
+    font-size:22px;
+
+}
+
+/* Kart Yazısı */
+
+.dashboard-card p{
+
+    color:#666;
+
+    line-height:1.6;
+
+}
+
+/* Logout */
+
+.logout-card{
+
+    background:linear-gradient(
+            135deg,
+            #882078,
+            #307DBB
+    );
+
+    color:white;
+
+}
+
+.logout-card .card-title{
+
+    color:white;
+
+}
+
+.logout-card p{
+
+    color:white;
+
+}
+
+/* Responsive */
+
+@media(max-width:900px){
+
+    .dashboard-content{
+
+        margin-left:0;
+
+        padding:20px;
+
+    }
+
+}

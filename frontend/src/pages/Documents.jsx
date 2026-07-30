@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 
 import documentService from "../services/documentService";
+import { getCurrentUser } from "../services/authService";
+
 import DocumentTable from "../components/documents/DocumentTable";
 import DocumentModal from "../components/documents/DocumentModal";
-import { getCurrentUser } from "../services/authService";
+import Sidebar from "../components/Sidebar";
+import LoadingSpinner from "../components/common/LoadingSpinner";
+
+import "../styles/Documents.css";
+
 function Documents() {
 
     // Belge listesini tutar.
@@ -132,12 +138,14 @@ function Documents() {
 
     }, []);
 
+    // Sayfa yüklenirken gösterilir.
     if (loading) {
 
-        return <h2>Loading...</h2>;
+        return <LoadingSpinner />;
 
     }
 
+    // Hata oluşursa gösterilir.
     if (error) {
 
         return <h2>{error}</h2>;
@@ -146,65 +154,87 @@ function Documents() {
 
     return (
 
-        <div className="container mt-5">
+        // Documents sayfasının tamamı
+        <div className="documents">
 
-            <div className="d-flex justify-content-between align-items-center mb-3">
+            {/* Sol Menü */}
+            <Sidebar />
 
-                <h2>Documents</h2>
+            {/* Sağ taraftaki içerik */}
+            <main className="documents-content">
 
-                <button
-                    className="btn btn-success"
-                    onClick={() => {
+                {/* Sayfa başlığı */}
+                <section className="documents-header">
 
-                        setSelectedDocument(null);
+                    <div>
 
-                        setShowModal(true);
+                        <h1>Documents</h1>
 
-                    }}
-                >
+                        <p>
 
-                    Upload Document
+                            Manage, upload and update your documents.
 
-                </button>
+                        </p>
 
-            </div>
+                    </div>
 
-            <DocumentTable
-
-                documents={documents}
-
-                currentUser={currentUser}
-
-                onDelete={handleDelete}
-
-                onUpdate={handleUpdate}
-
-            />
-
-            {
-
-                showModal && (
-
-                    <DocumentModal
-
-                        document={selectedDocument}
-
-                        onClose={() => {
-
-                            setShowModal(false);
+                    {/* Upload butonu */}
+                    <button
+                        className="upload-button"
+                        onClick={() => {
 
                             setSelectedDocument(null);
 
+                            setShowModal(true);
+
                         }}
+                    >
 
-                        onSuccess={loadDocuments}
+                        Upload Document
 
+                    </button>
 
-                    />
+                </section>
 
-                )
+                {/* Doküman Tablosu */}
+                <DocumentTable
 
-            }
+                    documents={documents}
+
+                    currentUser={currentUser}
+
+                    onDelete={handleDelete}
+
+                    onUpdate={handleUpdate}
+
+                />
+
+                {/* Upload / Update Modalı */}
+                {
+
+                    showModal && (
+
+                        <DocumentModal
+
+                            document={selectedDocument}
+
+                            onClose={() => {
+
+                                setShowModal(false);
+
+                                setSelectedDocument(null);
+
+                            }}
+
+                            onSuccess={loadDocuments}
+
+                        />
+
+                    )
+
+                }
+
+            </main>
 
         </div>
 

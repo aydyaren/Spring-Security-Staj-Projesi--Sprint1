@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 
 import { getCurrentUser } from "../services/authService";
 
+import Sidebar from "../components/Sidebar";
+
+import "../styles/Profile.css";
+
 function Profile() {
 
     // Giriş yapan kullanıcının bilgilerini tutar.
@@ -11,7 +15,7 @@ function Profile() {
     // Sayfa yönlendirmelerini sağlar.
     const navigate = useNavigate();
 
-    // Backend'den giriş yapan kullanıcıyı alır.
+    // Backend'den giriş yapan kullanıcı bilgilerini getirir.
     const loadUser = async () => {
 
         try {
@@ -42,52 +46,101 @@ function Profile() {
 
     return (
 
-        <div className="container mt-5">
+        // Profile sayfasının tamamı
+        <div className="documents">
 
-            <h2>Profile</h2>
+            {/* Sol Menü */}
+            <Sidebar />
 
-            {
+            {/* Sağ taraftaki içerik */}
+            <main className="documents-content">
 
-                user && (
+                {/* Sayfa başlığı */}
+                <section className="documents-header">
 
-                    <div className="card mt-4" style={{ maxWidth: "500px" }}>
+                    <div>
 
-                        <div className="card-body">
+                        <h1>Profile</h1>
 
-                            <p>
-                                <strong>First Name:</strong> {user.firstName}
-                            </p>
+                        <p>
 
-                            <p>
-                                <strong>Last Name:</strong> {user.lastName}
-                            </p>
+                            View your account information.
 
-                            <p>
-                                <strong>Username:</strong> {user.username}
-                            </p>
-
-                            <p>
-                                <strong>E-mail:</strong> {user.email}
-                            </p>
-
-                            <p>
-                                <strong>Role:</strong> {user.role}
-                            </p>
-
-                        </div>
+                        </p>
 
                     </div>
 
-                )
+                </section>
 
-            }
+                {/* Profil Kartı */}
+                {
 
-            <button
-                className="btn btn-secondary mt-3"
-                onClick={() => navigate("/dashboard")}
-            >
-                Return
-            </button>
+                    user && (
+
+                        <div className="profile-card">
+
+                            {/* Ad */}
+                            <div className="profile-row">
+
+                                <span>First Name</span>
+
+                                <strong>{user.firstName}</strong>
+
+                            </div>
+
+                            {/* Soyad */}
+                            <div className="profile-row">
+
+                                <span>Last Name</span>
+
+                                <strong>{user.lastName}</strong>
+
+                            </div>
+
+                            {/* Kullanıcı Adı */}
+                            <div className="profile-row">
+
+                                <span>Username</span>
+
+                                <strong>{user.username}</strong>
+
+                            </div>
+
+                            {/* Email */}
+                            <div className="profile-row">
+
+                                <span>E-mail</span>
+
+                                <strong>{user.email}</strong>
+
+                            </div>
+
+                            {/* Rol */}
+                            <div className="profile-row">
+
+                                <span>Role</span>
+
+                                <strong>{user.role}</strong>
+
+                            </div>
+
+                        </div>
+
+                    )
+
+                }
+
+                {/* Dashboard'a Dön */}
+                <button
+                    className="upload-button"
+                    onClick={() => navigate("/dashboard")}
+                >
+
+                    Return Dashboard
+
+                </button>
+
+            </main>
 
         </div>
 

@@ -2,19 +2,35 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
+    FileText,
+    Users,
+    User,
+    LogOut
+} from "lucide-react";
+
+import LoadingSpinner from "../components/common/LoadingSpinner";
+
+import {
     getCurrentUser,
     logout
 } from "../services/authService";
 
+import Sidebar from "../components/Sidebar";
+
+import "../styles/Dashboard.css";
+
 function Dashboard() {
 
-    // Giriş yapan kullanıcı bilgisini tutar.
+    // Giriş yapan kullanıcı bilgisi.
     const [user, setUser] = useState(null);
 
-    // Sayfa yönlendirmelerini sağlar.
+    // Sayfanın yüklenme durumu.
+    const [loading, setLoading] = useState(true);
+
+    // Sayfa yönlendirmesi.
     const navigate = useNavigate();
 
-    // Backend'den giriş yapan kullanıcıyı alır.
+    // Kullanıcı bilgilerini getirir.
     const loadUser = async () => {
 
         try {
@@ -27,23 +43,26 @@ function Dashboard() {
 
             console.error(error);
 
+        } finally {
+
+            setLoading(false);
+
         }
 
     };
 
-    // Kullanıcı yönetim sayfasına yönlendirir.
+    // Users sayfasına gider.
     const goToUsers = () => {
 
         navigate("/users");
 
     };
 
-    // Kullanıcının çıkış işlemini gerçekleştirir.
+    // Çıkış işlemi.
     const handleLogout = async () => {
 
         try {
 
-            // Backend'deki Refresh Token'ı iptal eder.
             await logout();
 
         } catch (error) {
@@ -52,87 +71,157 @@ function Dashboard() {
 
         }
 
-        // Tarayıcıdaki Access Token'ı siler.
         localStorage.removeItem("accessToken");
 
-        // Login sayfasına yönlendirir.
         navigate("/");
 
     };
 
     useEffect(() => {
 
-        const loadData = async () => {
-
-            await loadUser();
-
-        };
-
-        loadData().catch(console.error);
+        loadUser().catch(console.error);
 
     }, []);
 
+    if (loading) {
+
+        return <LoadingSpinner />;
+
+    }
+
     return (
 
-        <div className="container mt-5">
+        <div className="dashboard">
 
-            <h2>Dashboard</h2>
+            {/* Sol Menü */}
+            <Sidebar />
 
-            {
+            {/* Sağ İçerik */}
+            <main className="dashboard-content">
 
-                user && (
+                {/* Hero */}
+                <section className="hero">
 
-                    <div className="mt-4">
+                    <div>
 
-                        {
-                            user.role === "ADMIN" && (
+                        <h1>
 
-                                <button
-                                    className="btn btn-primary me-2"
-                                    onClick={goToUsers}
-                                >
-                                    Users
-                                </button>
+                            Welcome back, {user?.firstName} 👋
 
-                            )
-                        }
+                        </h1>
 
-                        {
-                            (
-                                user.role === "ADMIN" ||
-                                user.role === "MANAGER" ||
-                                user.role === "EMPLOYEE"
-                            ) && (
+                        <p>
 
-                                <button
-                                    className="btn btn-primary me-2"
-                                    onClick={() => navigate("/documents")}
-                                >
-                                    Documents
-                                </button>
+                            Manage your documents securely with Argela DMS.
 
-                            )
-                        }
-
-                        <button
-                            className="btn btn-danger me-2"
-                            onClick={handleLogout}
-                        >
-                            Logout
-                        </button>
-
-                        <button
-                            className="btn btn-primary me-2"
-                            onClick={() => navigate("/profile")}
-                        >
-                            Profile
-                        </button>
+                        </p>
 
                     </div>
 
-                )
+                </section>
 
-            }
+                {/* Kartlar */}
+                <section className="dashboard-cards">
+
+                    {/* Documents */}
+                    <div
+                        className="dashboard-card"
+                        onClick={() => navigate("/documents")}
+                    >
+
+                        <h3 className="card-title">
+
+                            <FileText size={24} />
+
+                            Documents
+
+                        </h3>
+
+                        <p>
+
+                            Upload, update and manage your documents.
+
+                        </p>
+
+                    </div>
+
+                    {/* Users */}
+                    {
+
+                        user?.role === "ADMIN" && (
+
+                            <div
+                                className="dashboard-card"
+                                onClick={goToUsers}
+                            >
+
+                                <h3 className="card-title">
+
+                                    <Users size={24} />
+
+                                    Users
+
+                                </h3>
+
+                                <p>
+
+                                    Manage system users and roles.
+
+                                </p>
+
+                            </div>
+
+                        )
+
+                    }
+
+                    {/* Profile */}
+                    <div
+                        className="dashboard-card"
+                        onClick={() => navigate("/profile")}
+                    >
+
+                        <h3 className="card-title">
+
+                            <User size={24} />
+
+                            Profile
+
+                        </h3>
+
+                        <p>
+
+                            View and manage your account information.
+
+                        </p>
+
+                    </div>
+
+                    {/* Logout */}
+                    <div
+                        className="dashboard-card logout-card"
+                        onClick={handleLogout}
+                    >
+
+                        <h3 className="card-title">
+
+                            <LogOut size={24} />
+
+                            Logout
+
+                        </h3>
+
+                        <p>
+
+                            Sign out safely from your account.
+
+                        </p>
+
+                    </div>
+
+                </section>
+
+            </main>
 
         </div>
 
@@ -141,4 +230,3 @@ function Dashboard() {
 }
 
 export default Dashboard;
-

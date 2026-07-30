@@ -1,0 +1,81 @@
+/* ===========================================================
+   USERS PAGE
+=========================================================== */
+
+.documents {
+
+    display: flex;
+
+    min-height: 100vh;
+
+    background: #F7F8FC;
+
+}
+
+.documents-content {
+
+    flex: 1;
+
+    margin-left: 260px;
+
+    padding: 40px;
+
+}
+
+.documents-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 30px;
+
+}
+
+.documents-header h1 {
+
+    font-size: 34px;
+
+    color: #22243A;
+
+}
+
+.documents-header p {
+
+    color: #777;
+
+    margin-top: 8px;
+
+}
+
+.upload-button {
+
+    border: none;
+
+    padding: 14px 22px;
+
+    border-radius: 12px;
+
+    color: white;
+
+    cursor: pointer;
+
+    font-weight: 600;
+
+    background: linear-gradient(
+            135deg,
+            #882078,
+            #307DBB
+    );
+
+    transition: .3s;
+
+}
+
+.upload-button:hover {
+
+    transform: translateY(-3px);
+
+}

@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 
 import userService from "../services/userService";
+
 import UserTable from "../components/users/UserTable";
 import UserModal from "../components/users/UserModal";
+import Sidebar from "../components/Sidebar";
+import LoadingSpinner from "../components/common/LoadingSpinner";
+
+import "../styles/Users.css";
 
 function Users() {
 
@@ -70,16 +75,16 @@ function Users() {
 
             await loadUsers();
 
-        }  catch (error) {
+        } catch (error) {
 
-            // Beklenen 409 hatasını konsola yazdırma.
+            // Beklenen 409 hatasını konsola yazdırmaz.
             if (error.response?.status !== 409) {
 
                 console.error(error);
 
             }
 
-            // Kullanıcının belgeleri varsa ikinci onayı ister.
+            // Kullanıcının belgeleri varsa ikinci onay ister.
             if (error.response?.status === 409) {
 
                 const confirmed = window.confirm(
@@ -115,7 +120,6 @@ function Users() {
 
             }
 
-
         }
 
     };
@@ -134,10 +138,11 @@ function Users() {
 
     if (loading) {
 
-        return <h2>Loading...</h2>;
+        return <LoadingSpinner />;
 
     }
 
+    // Hata oluşursa gösterilir.
     if (error) {
 
         return <h2>{error}</h2>;
@@ -146,63 +151,86 @@ function Users() {
 
     return (
 
-        <div className="container mt-5">
+        // Users sayfasının tamamı
+        <div className="documents">
 
-            <div className="d-flex justify-content-between align-items-center mb-3">
+            {/* Sol Menü */}
+            <Sidebar />
 
-                <h2>Users</h2>
+            {/* Sağ taraftaki içerik */}
+            <main className="documents-content">
 
-                <button
-                    className="btn btn-success"
-                    onClick={() => {
+                {/* Sayfa başlığı */}
+                <section className="documents-header">
 
-                        // Yeni kullanıcı ekleme modunu açar.
-                        setSelectedUser(null);
+                    <div>
 
-                        setShowModal(true);
+                        <h1>Users</h1>
 
-                    }}
-                >
+                        <p>
 
-                    Add User
+                            Manage system users and their roles.
 
-                </button>
+                        </p>
 
-            </div>
+                    </div>
 
-            <UserTable
+                    {/* Yeni kullanıcı ekleme butonu */}
+                    <button
+                        className="upload-button"
+                        onClick={() => {
 
-                users={users}
-
-                onEdit={handleEdit}
-
-                onDelete={handleDelete}
-
-            />
-
-            {
-
-                showModal && (
-
-                    <UserModal
-
-                        selectedUser={selectedUser}
-
-                        onClose={() => {
-
-                            setShowModal(false);
-
+                            // Yeni kullanıcı ekleme modunu açar.
                             setSelectedUser(null);
 
+                            setShowModal(true);
+
                         }}
+                    >
 
-                        onSuccess={loadUsers}
+                        Add User
 
-                    />
+                    </button>
 
-                )
+                </section>
 
-            }
+                {/* Kullanıcı tablosu */}
+                <UserTable
+
+                    users={users}
+
+                    onEdit={handleEdit}
+
+                    onDelete={handleDelete}
+
+                />
+
+                {/* Kullanıcı ekleme / güncelleme modalı */}
+                {
+
+                    showModal && (
+
+                        <UserModal
+
+                            selectedUser={selectedUser}
+
+                            onClose={() => {
+
+                                setShowModal(false);
+
+                                setSelectedUser(null);
+
+                            }}
+
+                            onSuccess={loadUsers}
+
+                        />
+
+                    )
+
+                }
+
+            </main>
 
         </div>
 

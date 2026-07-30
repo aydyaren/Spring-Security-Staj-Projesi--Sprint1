@@ -1,0 +1,273 @@
+/* ===========================================================
+   SIDEBAR
+=========================================================== */
+
+.sidebar{
+
+    width:260px;
+    height:100vh;
+
+    position:fixed;
+    left:0;
+    top:0;
+
+    background:#221B3A;
+
+    color:white;
+
+    display:flex;
+    flex-direction:column;
+
+    padding:30px 20px;
+
+    box-shadow:4px 0 20px rgba(0,0,0,.15);
+
+    z-index:1000;
+
+}
+
+/* ===========================================================
+   LOGO
+=========================================================== */
+
+.sidebar-logo{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    margin-bottom:30px;
+
+}
+
+.logo-image{
+
+    width:145px;
+
+    height:auto;
+
+    object-fit:contain;
+
+}
+
+/* ===========================================================
+   USER CARD
+=========================================================== */
+
+.sidebar-user{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    padding:18px;
+
+    border-radius:18px;
+
+    background:rgba(255,255,255,.06);
+
+    margin-bottom:45px;
+
+}
+
+.avatar{
+
+    width:58px;
+
+    height:58px;
+
+    border-radius:50%;
+
+    background:linear-gradient(
+            135deg,
+            #882078,
+            #307DBB
+    );
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    color:white;
+
+    font-size:20px;
+
+    font-weight:bold;
+
+    flex-shrink:0;
+
+}
+
+.sidebar-user h4{
+
+    margin:0 0 6px 0;
+
+    font-size:16px;
+
+    font-weight:600;
+
+}
+
+.sidebar-user p{
+
+    margin:0;
+
+    color:#9FA7C4;
+
+    font-size:12px;
+
+    font-weight:700;
+
+    letter-spacing:1px;
+
+    text-transform:uppercase;
+
+}
+
+/* ===========================================================
+   MENU
+=========================================================== */
+
+.sidebar-menu{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:8px;
+
+}
+
+.sidebar-menu a{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding:14px 16px;
+
+    border-radius:14px;
+
+    color:white;
+
+    text-decoration:none;
+
+    font-weight:500;
+
+    transition:.30s;
+
+}
+
+.sidebar-menu a:hover{
+
+    background:rgba(255,255,255,.10);
+
+    transform:translateX(6px);
+
+}
+
+.sidebar-menu a.active{
+
+    background:linear-gradient(
+            135deg,
+            #882078,
+            #307DBB
+    );
+
+    box-shadow:0 8px 18px rgba(0,0,0,.20);
+
+}
+
+/* ===========================================================
+   LOGOUT
+=========================================================== */
+
+.logout-btn{
+
+    margin-top:auto;
+
+    border:none;
+
+    border-radius:14px;
+
+    padding:15px;
+
+    cursor:pointer;
+
+    color:white;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:10px;
+
+    background:linear-gradient(
+            135deg,
+            #882078,
+            #307DBB
+    );
+
+    transition:.30s;
+
+}
+
+.logout-btn:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:0 12px 25px rgba(0,0,0,.25);
+
+}
+
+/* ===========================================================
+   SCROLL
+=========================================================== */
+
+.sidebar::-webkit-scrollbar{
+
+    width:6px;
+
+}
+
+.sidebar::-webkit-scrollbar-thumb{
+
+    background:rgba(255,255,255,.20);
+
+    border-radius:20px;
+
+}
+
+/* ===========================================================
+   RESPONSIVE
+=========================================================== */
+
+@media(max-width:900px){
+
+    .sidebar{
+
+        width:220px;
+
+    }
+
+    .logo-image{
+
+        width:130px;
+
+    }
+
+}

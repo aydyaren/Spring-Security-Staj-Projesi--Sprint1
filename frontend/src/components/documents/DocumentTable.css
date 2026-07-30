@@ -1,0 +1,263 @@
+/* ===========================================================
+   DOCUMENT TABLE
+=========================================================== */
+
+.document-table{
+
+    width:100%;
+
+    background:#FFFFFF;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.08);
+
+}
+
+/* Tablo */
+
+.document-table table{
+
+    width:100%;
+
+    table-layout:fixed;
+
+    border-collapse:collapse;
+
+    margin:0;
+
+}
+
+/* Header */
+
+.document-table thead{
+
+    background:#221B3A;
+
+    color:#FFFFFF;
+
+}
+
+.document-table th{
+
+    padding:18px 20px;
+
+    border:none;
+
+    white-space:nowrap;
+
+    font-weight:600;
+
+    font-size:15px;
+
+    /*letter-spacing:.3px;*/
+    letter-spacing: 0.02em;
+
+}
+
+/* Body */
+
+.document-table td{
+
+    padding:18px 20px;
+
+    vertical-align:middle;
+
+    border-color:#EEF2F7;
+
+    color:#344054;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+    white-space:nowrap;
+
+}
+
+/* Satırlar */
+
+.document-table tbody tr{
+
+    transition:.25s;
+
+}
+
+.document-table tbody tr:nth-child(even){
+
+    background:#FAFBFC;
+
+}
+
+.document-table tbody tr:hover{
+
+    background:#F1F7FF;
+
+}
+
+/* Kolon genişlikleri */
+
+.document-table th:nth-child(1),
+.document-table td:nth-child(1){
+
+    width:17%;
+
+}
+
+.document-table th:nth-child(2),
+.document-table td:nth-child(2){
+
+    width:20%;
+
+}
+
+.document-table th:nth-child(3),
+.document-table td:nth-child(3){
+
+    width:25%;
+
+}
+
+.document-table th:nth-child(4),
+.document-table td:nth-child(4){
+
+    width:12%;
+
+}
+
+.document-table th:nth-child(5),
+.document-table td:nth-child(5){
+
+    width:16%;
+
+}
+
+.document-table th:last-child,
+.document-table td:last-child{
+
+    width:170px;
+
+    text-align:center;
+
+}
+/* ===========================================================
+   BUTTONS
+=========================================================== */
+
+.action-buttons{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:10px;
+
+}
+
+.action-buttons button{
+
+    width:42px;
+
+    height:42px;
+
+    border:none;
+
+    border-radius:12px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    cursor:pointer;
+
+    color:white;
+
+    transition:.25s;
+
+}
+
+.action-buttons button:hover{
+
+    transform:translateY(-2px);
+
+}
+
+.download-btn{
+
+    background:#307DBB;
+
+}
+
+.download-btn:hover{
+
+    background:#26689E;
+
+}
+
+.update-btn{
+
+    background:#F0AD4E;
+
+}
+
+.update-btn:hover{
+
+    background:#DB993A;
+
+}
+
+.delete-btn{
+
+    background:#DC3545;
+
+}
+
+.delete-btn:hover{
+
+    background:#C62839;
+
+}
+
+/* ===========================================================
+   RESPONSIVE
+=========================================================== */
+
+@media(max-width:992px){
+
+    .document-table{
+
+        border-radius:16px;
+
+    }
+
+}
+
+@media(max-width:768px){
+
+    .document-table{
+
+        overflow-x:auto;
+
+    }
+
+    .action-buttons{
+
+        gap:8px;
+
+    }
+
+    .action-buttons button{
+
+        width:38px;
+
+        height:38px;
+
+    }
+
+}

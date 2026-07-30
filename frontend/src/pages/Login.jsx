@@ -2,6 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../services/authService";
 
+import "../styles/Login.css";
+import logo from "../assets/logo2.png";
+
+import { User, Lock, Eye, EyeOff } from "lucide-react";
 
 function Login() {
 
@@ -10,6 +14,9 @@ function Login() {
 
     // Kullanıcının girdiği şifreyi tutar.
     const [password, setPassword] = useState("");
+
+    // Şifreyi göster / gizle
+    const [showPassword, setShowPassword] = useState(false);
 
     // Sayfalar arasında geçiş yapmak için kullanılır.
     const navigate = useNavigate();
@@ -25,14 +32,11 @@ function Login() {
             // Backend'den gelen Access Token'ı alır.
             const accessToken = response.accessToken;
 
-            // Access Token'ı tarayıcıda saklar.
+            // Token'ı tarayıcıya kaydeder.
             localStorage.setItem("accessToken", accessToken);
 
-            // Login başarılı olunca Dashboard sayfasına yönlendirir.
+            // Dashboard sayfasına yönlendir.
             navigate("/dashboard");
-
-            // Test amacıyla Access Token'ı ekrana yazdırır.
-            console.log(accessToken);
 
         } catch (error) {
 
@@ -44,46 +48,74 @@ function Login() {
 
     return (
 
-        <div className="container mt-5">
+        <div className="login-page">
 
-            <h2>Login</h2>
+            {/* Arka plan efektleri */}
+            <div className="background-blur"></div>
+            <div className="background-grid"></div>
+            <div className="background-wave"></div>
 
-            <div className="mb-3">
+            {/* Login Kartı */}
+            <div className="login-card">
 
-                <label className="form-label">
-                    Username or Email
-                </label>
-
-                <input
-                    type="text"
-                    className="form-control"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                {/* Logo */}
+                <img
+                    src={logo}
+                    alt="Argela Logo"
+                    className="login-logo"
                 />
 
+                {/* Başlık */}
+                <h1>Welcome back</h1>
+
+                {/* Username */}
+                <div className="input-group">
+
+                    <User size={20} color="#8d8d98" />
+
+                    <input
+                        type="text"
+                        placeholder="Username or Email"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
+
+                </div>
+
+                {/* Password */}
+                <div className="input-group">
+
+                    <Lock size={20} color="#8d8d98" />
+
+                    <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+
+                    <span
+                        className="eye"
+                        onClick={() => setShowPassword(!showPassword)}
+                    >
+                        {showPassword ? (
+                            <EyeOff size={20} color="#8d8d98" />
+                        ) : (
+                            <Eye size={20} color="#8d8d98" />
+                        )}
+                    </span>
+
+                </div>
+
+                {/* Login Butonu */}
+                <button
+                    className="login-button"
+                    onClick={handleLogin}
+                >
+                    LOGIN
+                </button>
+
             </div>
-
-            <div className="mb-3">
-
-                <label className="form-label">
-                    Password
-                </label>
-
-                <input
-                    type="password"
-                    className="form-control"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-
-            </div>
-
-            <button
-                className="btn btn-primary"
-                onClick={handleLogin}
-            >
-                Login
-            </button>
 
         </div>
 

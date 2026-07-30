@@ -1,0 +1,54 @@
+/* ===========================================================
+   PROFILE PAGE
+=========================================================== */
+
+/* Profil kartı */
+.profile-card{
+
+    background:white;
+
+    border-radius:20px;
+
+    padding:35px;
+
+    margin-bottom:30px;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.08);
+
+}
+
+/* Satırlar */
+.profile-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:18px 0;
+
+    border-bottom:1px solid #ECECEC;
+
+}
+
+/* Son satır */
+.profile-row:last-child{
+
+    border-bottom:none;
+
+}
+
+/* Sol yazılar */
+.profile-row span{
+
+    color:#777;
+
+}
+
+/* Sağ yazılar */
+.profile-row strong{
+
+    color:#22243A;
+
+}

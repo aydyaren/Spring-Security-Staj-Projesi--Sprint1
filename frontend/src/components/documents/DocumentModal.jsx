@@ -1,59 +1,145 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import {
+    FilePlus,
+    FileText,
+    Type,
+    AlignLeft,
+    Upload
+} from "lucide-react";
 
 import documentService from "../../services/documentService";
 
+import "./DocumentModal.css";
+
 function DocumentModal({
-                           document,
+
+                           // Güncellenecek belge
+                           document: selectedDocument,
+
                            onClose,
+
                            onSuccess
+
                        }) {
 
-    // Form alanlarını tutar.
+    // Başlık bilgisi
     const [title, setTitle] = useState(
-        document?.title ?? ""
+
+        selectedDocument?.title ?? ""
+
     );
 
+    // Açıklama bilgisi
     const [description, setDescription] = useState(
-        document?.description ?? ""
+
+        selectedDocument?.description ?? ""
+
     );
 
+    /** @type {[File | null, Function]} */
     const [file, setFile] = useState(null);
 
-    // Backend hata mesajını tutar.
+    // Backend hata mesajı
     const [error, setError] = useState("");
 
-    // Formu gönderir.
+    // Buton loading durumu
+    const [loading, setLoading] = useState(false);
+
+    // ESC ile modalı kapatır.
+    useEffect(() => {
+
+        const handleKeyDown = (event) => {
+
+            if (event.key === "Escape") {
+
+                onClose();
+
+            }
+
+        };
+
+        // Browser document nesnesi
+        window.document.addEventListener(
+
+            "keydown",
+
+            handleKeyDown
+
+        );
+
+        return () => {
+
+            window.document.removeEventListener(
+
+                "keydown",
+
+                handleKeyDown
+
+            );
+
+        };
+
+    }, [onClose]);
+
+    // Form gönderilir.
     const handleSubmit = async (e) => {
 
         e.preventDefault();
+
+        setLoading(true);
+
+        setError("");
 
         try {
 
             const formData = new FormData();
 
-            formData.append("title", title);
-            formData.append("description", description);
+            formData.append(
 
-            if (file) {
+                "title",
 
-                formData.append("file", file);
+                title
+
+            );
+
+            formData.append(
+
+                "description",
+
+                description
+
+            );
+
+            if (file instanceof File) {
+
+                formData.append(
+                    "file",
+                    file
+                );
 
             }
 
             // Güncelleme işlemi
-            if (document) {
+            if (selectedDocument) {
 
                 await documentService.updateDocument(
-                    document.id,
+
+                    selectedDocument.id,
+
                     formData
+
                 );
 
             }
-            // Yeni belge oluşturma
+
+            // Yeni yükleme işlemi
             else {
 
                 await documentService.uploadDocument(
+
                     formData
+
                 );
 
             }
@@ -61,20 +147,27 @@ function DocumentModal({
             await onSuccess();
 
             onClose();
-
         } catch (error) {
 
             console.error(error);
 
+            // Backend hata mesajı varsa gösterilir.
             if (error.response?.data?.message) {
-
-                setError(error.response.data.message);
-
-            } else {
 
                 setError(
 
-                    document
+                    error.response.data.message
+
+                );
+
+            }
+
+            // Genel hata mesajı
+            else {
+
+                setError(
+
+                    selectedDocument
                         ? "Update failed."
                         : "Upload failed."
 
@@ -84,35 +177,97 @@ function DocumentModal({
 
         }
 
+        finally {
+
+            setLoading(false);
+
+        }
+
     };
+    useEffect(() => {
+
+        document.body.style.overflow = "hidden";
+
+        return () => {
+
+            document.body.style.overflow = "";
+
+        };
+
+    }, []);
 
     return (
 
-        <div className="modal d-block">
+        // Arka plan
+        <div
 
-            <div className="modal-dialog">
+            className="document-modal-overlay"
 
-                <div className="modal-content">
+            onClick={onClose}
 
-                    <div className="modal-header">
+        >
 
-                        <h5>
+            {/* Modal */}
 
-                            {
+            <div
 
-                                document
-                                    ? "Update Document"
-                                    : "Upload Document"
+                className="document-modal"
 
-                            }
+                onClick={(e) => e.stopPropagation()}
 
-                        </h5>
+            >
+
+                <div className="document-modal-content">
+
+                    {/* Header */}
+
+                    <div className="document-modal-header">
+
+                        <div className="modal-title">
+
+                            <FilePlus size={28} />
+
+                            <div>
+
+                                <h5>
+
+                                    {
+
+                                        selectedDocument
+
+                                            ? "Update Document"
+
+                                            : "Upload Document"
+
+                                    }
+
+                                </h5>
+
+                                <p>
+
+                                    {
+
+                                        selectedDocument
+
+                                            ? "Update your document information."
+
+                                            : "Upload a new document."
+
+                                    }
+
+                                </p>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
+                    {/* Form */}
+
                     <form onSubmit={handleSubmit}>
 
-                        <div className="modal-body">
+                        <div className="document-modal-body">
 
                             {
 
@@ -128,40 +283,148 @@ function DocumentModal({
 
                             }
 
+                            {/* Title */}
+
+                            <label className="form-label">
+
+                                <Type size={16} />
+
+                                Title
+
+                            </label>
+
                             <input
-                                className="form-control mb-3"
-                                placeholder="Title"
+
+                                className="document-input"
+
+                                placeholder="Enter title"
+
                                 value={title}
+
                                 onChange={(e) =>
-                                    setTitle(e.target.value)
+
+                                    setTitle(
+
+                                        e.target.value
+
+                                    )
+
                                 }
+
                             />
+
+                            {/* Description */}
+
+                            <label className="form-label">
+
+                                <AlignLeft size={16} />
+
+                                Description
+
+                            </label>
 
                             <textarea
-                                className="form-control mb-3"
-                                placeholder="Description"
-                                value={description}
-                                onChange={(e) =>
-                                    setDescription(e.target.value)
-                                }
-                            />
 
-                            <input
-                                className="form-control"
-                                type="file"
+                                className="document-input"
+
+                                rows="4"
+
+                                placeholder="Enter description"
+
+                                value={description}
+
                                 onChange={(e) =>
-                                    setFile(e.target.files[0])
+
+                                    setDescription(
+
+                                        e.target.value
+
+                                    )
+
                                 }
+
                             />
+                            {/* Dosya */}
+
+                            <label className="form-label">
+
+                                <FileText size={16} />
+
+                                Document
+
+                            </label>
+
+                            <div className="file-upload-box">
+
+                                <label
+                                    htmlFor="documentFile"
+                                    className="file-upload-label"
+                                >
+
+                                    <Upload size={20} />
+
+                                    <span>
+
+                                        {
+
+                                            file
+
+                                                ? file.name
+
+                                                : (
+
+                                                    selectedDocument
+
+                                                        ? "Choose a new file (optional)"
+
+                                                        : "Choose a file"
+
+                                                )
+
+                                        }
+
+                                    </span>
+
+                                </label>
+
+                                <input
+
+                                    id="documentFile"
+
+                                    type="file"
+
+                                    onChange={(e) => {
+
+                                        const selectedFile = e.target.files?.[0];
+
+                                        if (selectedFile) {
+
+                                            setFile(selectedFile);
+
+                                        }
+
+                                    }}
+
+                                />
+
+                            </div>
 
                         </div>
 
-                        <div className="modal-footer">
+                        {/* Footer */}
+
+                        <div className="document-modal-footer">
 
                             <button
+
                                 type="button"
-                                className="btn btn-secondary"
+
+                                className="document-button-secondary"
+
                                 onClick={onClose}
+
+                                disabled={loading}
+
                             >
 
                                 Cancel
@@ -169,15 +432,38 @@ function DocumentModal({
                             </button>
 
                             <button
+
                                 type="submit"
-                                className="btn btn-success"
+
+                                className="document-button-primary"
+
+                                disabled={loading}
+
                             >
 
                                 {
 
-                                    document
-                                        ? "Update"
-                                        : "Upload"
+                                    loading
+
+                                        ? (
+
+                                            selectedDocument
+
+                                                ? "Updating..."
+
+                                                : "Uploading..."
+
+                                        )
+
+                                        : (
+
+                                            selectedDocument
+
+                                                ? "Update Document"
+
+                                                : "Upload Document"
+
+                                        )
 
                                 }
 

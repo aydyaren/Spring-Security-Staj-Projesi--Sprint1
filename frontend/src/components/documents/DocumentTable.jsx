@@ -1,4 +1,12 @@
+import {
+    Download,
+    Pencil,
+    Trash2
+} from "lucide-react";
+
 import documentService from "../../services/documentService";
+
+import "./DocumentTable.css";
 
 function DocumentTable({
                            documents,
@@ -45,9 +53,15 @@ function DocumentTable({
 
         return (
 
-            <div className="alert alert-info">
+            <div className="alert alert-light text-center p-5 rounded-4 shadow-sm">
 
-                No documents found.
+                <h5>No documents found</h5>
+
+                <p className="text-muted mb-0">
+
+                    Upload your first document.
+
+                </p>
 
             </div>
 
@@ -57,121 +71,145 @@ function DocumentTable({
 
     return (
 
-        <table className="table table-bordered table-hover">
+        <div className="document-table">
 
-            <thead className="table-dark">
+            <table className="table">
 
-            <tr>
+                <thead>
 
-                <th>ID</th>
-                <th>Title</th>
-                <th>Description</th>
-                <th>File Name</th>
-                <th>Owner</th>
-                <th>Created At</th>
-                <th>Actions</th>
+                <tr>
 
-            </tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>File Name</th>
+                    <th>Owner</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
 
-            </thead>
+                </tr>
 
-            <tbody>
+                </thead>
 
-            {
+                <tbody>
 
-                documents.map((document) => {
+                {
 
-                    const isAdmin =
-                        currentUser?.role === "ADMIN";
+                    documents.map((document) => {
 
-                    const isOwner =
-                        currentUser?.username === document.ownerUsername;
+                        const isAdmin =
+                            currentUser?.role === "ADMIN";
 
-                    return (
+                        const isOwner =
+                            currentUser?.username === document.ownerUsername;
 
-                        <tr key={document.id}>
+                        return (
 
-                            <td>{document.id}</td>
+                            <tr key={document.id}>
 
-                            <td>{document.title}</td>
+                                <td title={document.title}>
 
-                            <td>{document.description}</td>
+                                    {document.title}
 
-                            <td>{document.fileName}</td>
+                                </td>
 
-                            <td>{document.ownerUsername}</td>
+                                <td title={document.description}>
 
-                            <td>
-                                {
-                                    new Date(
-                                        document.createdAt
-                                    ).toLocaleString("tr-TR")
-                                }
-                            </td>
+                                    {document.description}
 
-                            <td>
+                                </td>
 
-                                {
+                                <td title={document.fileName}>
 
-                                    (isAdmin || isOwner) && (
+                                    {document.fileName}
 
-                                        <>
+                                </td>
 
-                                            <button
-                                                className="btn btn-primary btn-sm me-2"
-                                                onClick={() =>
-                                                    handleDownload(
-                                                        document.id,
-                                                        document.fileName
-                                                    )
-                                                }
-                                            >
+                                <td title={document.ownerUsername}>
 
-                                                Download
+                                    {document.ownerUsername}
 
-                                            </button>
+                                </td>
 
-                                            <button
-                                                className="btn btn-warning btn-sm me-2"
-                                                onClick={() =>
-                                                    onUpdate?.(document)
-                                                }
-                                            >
+                                <td>
 
-                                                Update
+                                    {
 
-                                            </button>
+                                        new Date(
+                                            document.createdAt
+                                        ).toLocaleString("tr-TR")
 
-                                            <button
-                                                className="btn btn-danger btn-sm"
-                                                onClick={() =>
-                                                    onDelete(document.id)
-                                                }
-                                            >
+                                    }
 
-                                                Delete
+                                </td>
 
-                                            </button>
+                                <td>
 
-                                        </>
+                                    {
 
-                                    )
+                                        (isAdmin || isOwner) && (
 
-                                }
+                                            <div className="action-buttons">
 
-                            </td>
+                                                <button
+                                                    className="download-btn"
+                                                    title="Download"
+                                                    onClick={() =>
+                                                        handleDownload(
+                                                            document.id,
+                                                            document.fileName
+                                                        )
+                                                    }
+                                                >
 
-                        </tr>
+                                                    <Download size={18}/>
 
-                    );
+                                                </button>
 
-                })
+                                                <button
+                                                    className="update-btn"
+                                                    title="Update"
+                                                    onClick={() =>
+                                                        onUpdate(document)
+                                                    }
+                                                >
 
-            }
+                                                    <Pencil size={18}/>
 
-            </tbody>
+                                                </button>
 
-        </table>
+                                                <button
+                                                    className="delete-btn"
+                                                    title="Delete"
+                                                    onClick={() =>
+                                                        onDelete(document.id)
+                                                    }
+                                                >
+
+                                                    <Trash2 size={18}/>
+
+                                                </button>
+
+                                            </div>
+
+                                        )
+
+                                    }
+
+                                </td>
+
+                            </tr>
+
+                        );
+
+                    })
+
+                }
+
+                </tbody>
+
+            </table>
+
+        </div>
 
     );
 

@@ -1,0 +1,65 @@
+/* Sayfayı ortalar */
+
+.loading-container{
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    height:100vh;
+
+    background:#F7F8FC;
+
+}
+
+/* Dönen halka */
+
+.loading-spinner{
+
+    width:65px;
+
+    height:65px;
+
+    border:6px solid #E6E6E6;
+
+    border-top:6px solid #307DBB;
+
+    border-radius:50%;
+
+    animation:spin .8s linear infinite;
+
+}
+
+/* Yazı */
+
+.loading-container h3{
+
+    margin-top:20px;
+
+    color:#444;
+
+    font-weight:600;
+
+}
+
+/* Animasyon */
+
+@keyframes spin{
+
+    from{
+
+        transform:rotate(0deg);
+
+    }
+
+    to{
+
+        transform:rotate(360deg);
+
+    }
+
+}
