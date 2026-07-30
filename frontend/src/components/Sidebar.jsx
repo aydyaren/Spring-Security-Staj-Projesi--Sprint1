@@ -16,13 +16,18 @@ import "./Sidebar.css";
 
 function Sidebar() {
 
-    // Giriş yapan kullanıcı
+    // Giriş yapan kullanıcı bilgisi
     const [currentUser, setCurrentUser] = useState(null);
+
+    // Logout modalının açık/kapalı durumu
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     // Sayfa yönlendirmesi
     const navigate = useNavigate();
 
-    // Kullanıcı bilgilerini yükler
+    /*
+     * Kullanıcı bilgilerini yükler.
+     */
     useEffect(() => {
 
         const loadUser = async () => {
@@ -45,7 +50,48 @@ function Sidebar() {
 
     }, []);
 
-    // Çıkış işlemi
+    /*
+     * Logout modalı açıkken:
+     * - Sayfanın scroll'unu kapatır.
+     * - ESC tuşu ile modalı kapatır.
+     */
+    useEffect(() => {
+
+        if (!showLogoutModal) {
+
+            document.body.style.overflow = "auto";
+
+            return;
+
+        }
+
+        document.body.style.overflow = "hidden";
+
+        const handleEsc = (event) => {
+
+            if (event.key === "Escape") {
+
+                setShowLogoutModal(false);
+
+            }
+
+        };
+
+        window.addEventListener("keydown", handleEsc);
+
+        return () => {
+
+            document.body.style.overflow = "auto";
+
+            window.removeEventListener("keydown", handleEsc);
+
+        };
+
+    }, [showLogoutModal]);
+
+    /*
+     * Gerçek logout işlemi.
+     */
     const handleLogout = async () => {
 
         try {
@@ -66,118 +112,192 @@ function Sidebar() {
 
     return (
 
-        <aside className="sidebar">
+        <>
 
-            {/* Logo */}
-            <div className="sidebar-logo">
+            <aside className="sidebar">
 
-                <img
-                    src={logo}
-                    alt="Argela Logo"
-                    className="logo-image"
-                />
+                {/* Logo */}
+                <div className="sidebar-logo">
 
-            </div>
-
-            {/* Kullanıcı Bilgileri */}
-            <div className="sidebar-user">
-
-                <div className="avatar">
-
-                    {currentUser?.firstName?.charAt(0)}
-                    {currentUser?.lastName?.charAt(0)}
+                    <img
+                        src={logo}
+                        alt="Argela Logo"
+                        className="logo-image"
+                    />
 
                 </div>
 
-                <div>
+                {/* Kullanıcı Bilgileri */}
+                <div className="sidebar-user">
 
-                    <h4>
+                    <div className="avatar">
 
-                        {currentUser?.firstName} {currentUser?.lastName}
+                        {currentUser?.firstName?.charAt(0)}
+                        {currentUser?.lastName?.charAt(0)}
 
-                    </h4>
+                    </div>
 
-                    <p>
+                    <div>
 
-                        {currentUser?.role}
+                        <h4>
 
-                    </p>
+                            {currentUser?.firstName} {currentUser?.lastName}
+
+                        </h4>
+
+                        <p>
+
+                            {currentUser?.role}
+
+                        </p>
+
+                    </div>
 
                 </div>
 
-            </div>
+                {/* Menü */}
+                <nav className="sidebar-menu">
 
-            {/* Menü */}
-            <nav className="sidebar-menu">
+                    <NavLink
+                        to="/dashboard"
+                        className={({ isActive }) =>
+                            isActive ? "active" : ""
+                        }
+                    >
 
-                <NavLink
-                    to="/dashboard"
-                    className={({ isActive }) => isActive ? "active" : ""}
+                        <LayoutDashboard size={20} />
+
+                        Dashboard
+
+                    </NavLink>
+
+                    <NavLink
+                        to="/documents"
+                        className={({ isActive }) =>
+                            isActive ? "active" : ""
+                        }
+                    >
+
+                        <FileText size={20} />
+
+                        Documents
+
+                    </NavLink>
+
+                    {
+                        currentUser?.role === "ADMIN" && (
+
+                            <NavLink
+                                to="/users"
+                                className={({ isActive }) =>
+                                    isActive ? "active" : ""
+                                }
+                            >
+
+                                <Users size={20} />
+
+                                Users
+
+                            </NavLink>
+
+                        )
+
+                    }
+
+                    <NavLink
+                        to="/profile"
+                        className={({ isActive }) =>
+                            isActive ? "active" : ""
+                        }
+                    >
+
+                        <User size={20} />
+
+                        Profile
+
+                    </NavLink>
+
+                </nav>
+
+                {/* Logout */}
+                <button
+                    className="logout-btn"
+                    onClick={() => setShowLogoutModal(true)}
                 >
 
-                    <LayoutDashboard size={20} />
+                    <LogOut size={18} />
 
-                    Dashboard
+                    Logout
 
-                </NavLink>
+                </button>
 
-                <NavLink
-                    to="/documents"
-                    className={({ isActive }) => isActive ? "active" : ""}
-                >
+            </aside>
+            {/* ===========================================================
+                LOGOUT CONFIRMATION MODAL
+            ============================================================ */}
 
-                    <FileText size={20} />
+            {
 
-                    Documents
+                showLogoutModal && (
 
-                </NavLink>
+                    <div
+                        className="logout-modal-overlay"
+                        onClick={() => setShowLogoutModal(false)}
+                    >
 
-                {/* Sadece ADMIN görebilir */}
-                {
-
-                    currentUser?.role === "ADMIN" && (
-
-                        <NavLink
-                            to="/users"
-                            className={({ isActive }) => isActive ? "active" : ""}
+                        <div
+                            className="logout-modal"
+                            onClick={(event) => event.stopPropagation()}
                         >
 
-                            <Users size={20} />
+                            {/* Başlık */}
+                            <div className="logout-modal-header">
 
-                            Users
+                                <h2>
 
-                        </NavLink>
+                                    Logout
 
-                    )
+                                </h2>
 
-                }
+                                <p>
 
-                <NavLink
-                    to="/profile"
-                    className={({ isActive }) => isActive ? "active" : ""}
-                >
+                                    Are you sure you want to logout?
 
-                    <User size={20} />
+                                </p>
 
-                    Profile
+                            </div>
 
-                </NavLink>
+                            {/* Butonlar */}
+                            <div className="logout-modal-footer">
 
-            </nav>
+                                <button
+                                    className="logout-cancel-btn"
+                                    onClick={() => setShowLogoutModal(false)}
+                                >
 
-            {/* Çıkış */}
-            <button
-                className="logout-btn"
-                onClick={handleLogout}
-            >
+                                    Cancel
 
-                <LogOut size={18} />
+                                </button>
 
-                Logout
+                                <button
+                                    className="logout-confirm-btn"
+                                    onClick={handleLogout}
+                                >
 
-            </button>
+                                    Logout
 
-        </aside>
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                )
+
+            }
+        </>
 
     );
 

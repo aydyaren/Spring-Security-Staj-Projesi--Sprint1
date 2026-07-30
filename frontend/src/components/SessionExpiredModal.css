@@ -1,0 +1,177 @@
+/* Arka plan */
+
+.session-modal-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(15, 23, 42, 0.55);
+
+    backdrop-filter: blur(6px);
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    z-index: 9999;
+
+    animation: fadeIn .25s ease;
+
+}
+
+
+/* Modal */
+
+.session-modal {
+
+    width: 420px;
+
+    max-width: 90%;
+
+    background: #ffffff;
+
+    border-radius: 22px;
+
+    box-shadow: 0 25px 60px rgba(0, 0, 0, .18);
+
+    overflow: hidden;
+
+    animation: popup .25s ease;
+
+}
+
+
+/* Header */
+
+.session-modal-header {
+
+    padding: 32px;
+
+    text-align: center;
+
+}
+
+
+.session-modal-header h2 {
+
+    margin: 0;
+
+    font-size: 24px;
+
+    font-weight: 700;
+
+    color: #1e293b;
+
+}
+
+
+.session-modal-header p {
+
+    margin-top: 18px;
+
+    color: #64748b;
+
+    font-size: 15px;
+
+    line-height: 1.6;
+
+}
+
+
+/* Footer */
+
+.session-modal-footer {
+
+    display: flex;
+
+    justify-content: center;
+
+    padding: 24px 32px 30px;
+
+}
+
+
+/* Button */
+
+.session-modal-button {
+
+    min-width: 140px;
+
+    padding: 12px 28px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: .25s;
+
+}
+
+
+.session-modal-button:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 12px 28px rgba(99, 102, 241, .35);
+
+}
+
+
+.session-modal-button:active {
+
+    transform: scale(.98);
+
+}
+
+
+/* Animations */
+
+@keyframes fadeIn {
+
+    from {
+
+        opacity: 0;
+
+    }
+
+    to {
+
+        opacity: 1;
+
+    }
+
+}
+
+
+@keyframes popup {
+
+    from {
+
+        opacity: 0;
+
+        transform: scale(.92);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform: scale(1);
+
+    }
+
+}

@@ -91,6 +91,16 @@ function DocumentModal({
 
         setError("");
 
+        if (!selectedDocument && !file) {
+
+            setError("Please select a document.");
+
+            setLoading(false);
+
+            return;
+
+        }
+
         try {
 
             const formData = new FormData();
@@ -393,15 +403,74 @@ function DocumentModal({
 
                                     type="file"
 
+                                    accept=".pdf,.doc,.docx,.jpeg,.jpg,.png"
+
                                     onChange={(e) => {
 
                                         const selectedFile = e.target.files?.[0];
 
-                                        if (selectedFile) {
+                                        if (!selectedFile) {
 
-                                            setFile(selectedFile);
+                                            return;
 
                                         }
+
+                                        // İzin verilen uzantılar
+                                        const allowedExtensions = [
+
+                                            "pdf",
+
+                                            "doc",
+
+                                            "docx",
+
+                                            "jpg",
+
+                                            "jpeg",
+
+                                            "png"
+
+                                        ];
+
+                                        const extension = selectedFile.name
+                                            .split(".")
+                                            .pop()
+                                            ?.toLowerCase();
+
+                                        if (!allowedExtensions.includes(extension)) {
+
+                                            setError(
+
+                                                "Invalid file type. Allowed: PDF, DOC, DOCX, JPG, JPEG and PNG."
+
+                                            );
+
+                                            setFile(null);
+
+                                            e.target.value = "";
+
+                                            return;
+
+                                        }
+
+                                        // Maksimum 10 MB
+                                        const maxSize = 10 * 1024 * 1024;
+
+                                        if (selectedFile.size > maxSize) {
+
+                                            setError("File size cannot exceed 10 MB.");
+
+                                            setFile(null);
+
+                                            e.target.value = "";
+
+                                            return;
+
+                                        }
+
+                                        setError("");
+
+                                        setFile(selectedFile);
 
                                     }}
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import userService from "../../services/userService";
 
@@ -12,10 +12,8 @@ function UserModal({
 
                    }) {
 
-    // Formdaki hata mesajını tutar.
     const [error, setError] = useState("");
 
-    // Form verilerini tutar.
     const [formData, setFormData] = useState({
 
         firstName: selectedUser?.firstName || "",
@@ -37,7 +35,34 @@ function UserModal({
 
     });
 
-    // Input değişikliklerini form state'ine yazar.
+    useEffect(() => {
+
+        // Modal açıkken arka planın scroll olmasını engeller.
+        document.body.style.overflow = "hidden";
+
+        const handleEsc = (event) => {
+
+            if (event.key === "Escape") {
+
+                onClose();
+
+            }
+
+        };
+
+        window.document.addEventListener("keydown", handleEsc);
+
+        return () => {
+
+            // Modal kapanınca sayfanın scroll'unu tekrar açar.
+            document.body.style.overflow = "auto";
+
+            window.document.removeEventListener("keydown", handleEsc);
+
+        };
+
+    }, [onClose]);
+
     const handleChange = (event) => {
 
         const { name, value } = event.target;
@@ -52,7 +77,6 @@ function UserModal({
 
     };
 
-    // Form gönderildiğinde kullanıcı ekler veya günceller.
     const handleSubmit = async (event) => {
 
         event.preventDefault();
@@ -63,7 +87,6 @@ function UserModal({
 
             if (selectedUser) {
 
-                // Kullanıcı günceller.
                 await userService.updateUser(
 
                     selectedUser.id,
@@ -86,22 +109,16 @@ function UserModal({
 
             } else {
 
-                // Yeni kullanıcı oluşturur.
                 await userService.createUser(formData);
 
             }
 
-            // Listeyi yeniler.
             await onSuccess();
 
-            // Modalı kapatır.
             onClose();
 
         } catch (error) {
 
-            console.error(error);
-
-            // Backend'den gelen hata mesajını gösterir.
             if (error.response?.data?.message) {
 
                 setError(error.response.data.message);
@@ -118,166 +135,205 @@ function UserModal({
 
     return (
 
-        <div
-            className="modal d-block"
-            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-        >
+        <div className="modal-overlay">
 
-            <div className="modal-dialog">
+            <div className="document-modal">
 
-                <div className="modal-content">
+                <div className="modal-header">
 
-                    <div className="modal-header">
+                    <h2>
 
-                        {/* Modal başlığı */}
-                        <h5 className="modal-title">
+                        {
+
+                            selectedUser
+
+                                ? "Edit User"
+
+                                : "Add User"
+
+                        }
+
+                    </h2>
+
+                    <button
+
+                        className="close-button"
+
+                        onClick={onClose}
+
+                    >
+
+                        ✕
+
+                    </button>
+
+                </div>
+
+                <form
+
+                    className="modal-form"
+
+                    onSubmit={handleSubmit}
+
+                >
+
+                    <div className="modal-body">
+
+                        {
+
+                            error && (
+
+                                <div className="modal-error">
+
+                                    {error}
+
+                                </div>
+
+                            )
+
+                        }
+
+                        <input
+
+                            name="firstName"
+
+                            placeholder="First Name"
+
+                            value={formData.firstName}
+
+                            onChange={handleChange}
+
+                            required
+
+                        />
+
+                        <input
+
+                            name="lastName"
+
+                            placeholder="Last Name"
+
+                            value={formData.lastName}
+
+                            onChange={handleChange}
+
+                            required
+
+                        />
+
+                        <input
+
+                            name="username"
+
+                            placeholder="Username"
+
+                            value={formData.username}
+
+                            onChange={handleChange}
+
+                            required
+
+                        />
+
+                        <input
+
+                            type="email"
+
+                            name="email"
+
+                            placeholder="Email"
+
+                            value={formData.email}
+
+                            onChange={handleChange}
+
+                            required
+
+                        />
+
+                        {
+
+                            !selectedUser && (
+
+                                <input
+
+                                    type="password"
+
+                                    name="password"
+
+                                    placeholder="Password"
+
+                                    value={formData.password}
+
+                                    onChange={handleChange}
+
+                                    required
+
+                                />
+
+                            )
+
+                        }
+
+                        <select
+
+                            name="roleId"
+
+                            value={formData.roleId}
+
+                            onChange={handleChange}
+
+                        >
+
+                            <option value={1}>ADMIN</option>
+
+                            <option value={2}>MANAGER</option>
+
+                            <option value={3}>EMPLOYEE</option>
+
+                        </select>
+
+                    </div>
+
+                    <div className="modal-footer">
+
+                        <button
+
+                            type="button"
+
+                            className="cancel-btn"
+
+                            onClick={onClose}
+
+                        >
+
+                            Cancel
+
+                        </button>
+
+                        <button
+
+                            type="submit"
+
+                            className="save-btn"
+
+                        >
 
                             {
 
                                 selectedUser
 
-                                    ? "Edit User"
+                                    ? "Update User"
 
-                                    : "Add User"
+                                    : "Create User"
 
                             }
 
-                        </h5>
-
-                        <button
-                            type="button"
-                            className="btn-close"
-                            onClick={onClose}
-                        />
+                        </button>
 
                     </div>
 
-                    <form onSubmit={handleSubmit}>
-
-                        <div className="modal-body">
-
-                            {
-
-                                error && (
-
-                                    <div className="alert alert-danger">
-
-                                        {error}
-
-                                    </div>
-
-                                )
-
-                            }
-
-                            <input
-                                className="form-control mb-3"
-                                placeholder="First Name"
-                                name="firstName"
-                                value={formData.firstName}
-                                onChange={handleChange}
-                                required
-                            />
-
-                            <input
-                                className="form-control mb-3"
-                                placeholder="Last Name"
-                                name="lastName"
-                                value={formData.lastName}
-                                onChange={handleChange}
-                                required
-                            />
-
-                            <input
-                                className="form-control mb-3"
-                                placeholder="Username"
-                                name="username"
-                                value={formData.username}
-                                onChange={handleChange}
-                                required
-                            />
-
-                            <input
-                                className="form-control mb-3"
-                                placeholder="Email"
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                            />
-
-                            {
-
-                                !selectedUser && (
-
-                                    <input
-                                        className="form-control mb-3"
-                                        placeholder="Password"
-                                        type="password"
-                                        name="password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        required
-                                    />
-
-                                )
-
-                            }
-
-                            <select
-                                className="form-select"
-                                name="roleId"
-                                value={formData.roleId}
-                                onChange={handleChange}
-                            >
-
-                                <option value={1}>ADMIN</option>
-
-                                <option value={2}>MANAGER</option>
-
-                                <option value={3}>EMPLOYEE</option>
-
-                            </select>
-
-                        </div>
-
-                        <div className="modal-footer">
-
-                            {/* Modalı kapatır. */}
-                            <button
-                                type="button"
-                                className="btn btn-secondary"
-                                onClick={onClose}
-                            >
-
-                                Cancel
-
-                            </button>
-
-                            {/* Kullanıcı ekler veya günceller. */}
-                            <button
-                                type="submit"
-                                className="btn btn-primary"
-                            >
-
-                                {
-
-                                    selectedUser
-
-                                        ? "Update"
-
-                                        : "Save"
-
-                                }
-
-                            </button>
-
-                        </div>
-
-                    </form>
-
-                </div>
+                </form>
 
             </div>
 

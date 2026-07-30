@@ -1,14 +1,49 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
 import Users from "../pages/Users";
 import Documents from "../pages/Documents";
-
-import ProtectedRoute from "../components/ProtectedRoute";
 import Profile from "../pages/Profile";
 
+import ProtectedRoute from "../components/ProtectedRoute";
+import SessionExpiredModal from "../components/SessionExpiredModal";
+
 function AppRouter() {
+
+    /*
+     * Session Expired modalının açık/kapalı durumunu tutar.
+     */
+    const [sessionExpired, setSessionExpired] = useState(false);
+
+    /*
+     * Axios tarafından gönderilen
+     * "session-expired" eventini dinler.
+     */
+    useEffect(() => {
+
+        const handleSessionExpired = () => {
+
+            setSessionExpired(true);
+
+        };
+
+        window.addEventListener(
+            "session-expired",
+            handleSessionExpired
+        );
+
+        return () => {
+
+            window.removeEventListener(
+                "session-expired",
+                handleSessionExpired
+            );
+
+        };
+
+    }, []);
 
     return (
 
@@ -16,13 +51,15 @@ function AppRouter() {
 
             <Routes>
 
-                {/* Giriş sayfasını gösterir. */}
+                {/* Login */}
+
                 <Route
                     path="/"
                     element={<Login />}
                 />
 
-                {/* Dashboard sayfasını sadece giriş yapan kullanıcılar görebilir. */}
+                {/* Dashboard */}
+
                 <Route
                     path="/dashboard"
                     element={
@@ -34,7 +71,8 @@ function AppRouter() {
                     }
                 />
 
-                {/* Kullanıcı yönetim sayfasını sadece giriş yapan kullanıcılar görebilir. */}
+                {/* Users */}
+
                 <Route
                     path="/users"
                     element={
@@ -46,7 +84,8 @@ function AppRouter() {
                     }
                 />
 
-                {/* Belge yönetim sayfasını sadece giriş yapan kullanıcılar görebilir. */}
+                {/* Documents */}
+
                 <Route
                     path="/documents"
                     element={
@@ -57,7 +96,9 @@ function AppRouter() {
                         </ProtectedRoute>
                     }
                 />
-                {/* Profil sayfasını sadece giriş yapan kullanıcılar görebilir. */}
+
+                {/* Profile */}
+
                 <Route
                     path="/profile"
                     element={
@@ -70,6 +111,16 @@ function AppRouter() {
                 />
 
             </Routes>
+
+            {/* Session Expired Modal */}
+
+            <SessionExpiredModal
+
+                open={sessionExpired}
+
+                onClose={() => setSessionExpired(false)}
+
+            />
 
         </BrowserRouter>
 

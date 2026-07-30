@@ -12,13 +12,17 @@
 
 }
 
-.documents-content {
+.documents-content{
 
-    flex: 1;
+    flex:1;
 
-    margin-left: 260px;
+    margin-left:260px;
 
-    padding: 40px;
+    padding:40px;
+
+    height:100vh;
+
+    overflow-y:auto;
 
 }
 
@@ -77,5 +81,408 @@
 .upload-button:hover {
 
     transform: translateY(-3px);
+
+}
+
+.documents-card{
+
+    background:white;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    box-shadow:0 12px 40px rgba(0,0,0,.08);
+
+}
+
+.documents-table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+.documents-table thead{
+
+    background:#22243A;
+
+    color:white;
+
+}
+
+.documents-table th{
+
+    padding:18px;
+
+    text-align:left;
+
+    font-weight:600;
+
+}
+
+.documents-table td{
+
+    padding:18px;
+
+    border-bottom:1px solid #ECECEC;
+
+}
+
+.documents-table tbody tr{
+
+    transition:.25s;
+
+}
+
+.documents-table tbody tr:hover{
+
+    background:#F6F8FC;
+
+}
+
+.role-badge{
+
+    display:inline-block;
+
+    padding:6px 14px;
+
+    border-radius:50px;
+
+    font-size:13px;
+
+    font-weight:700;
+
+}
+
+.role-admin{
+
+    background:#FFE5E5;
+
+    color:#D6002F;
+
+}
+
+.role-manager{
+
+    background:#E8F0FF;
+
+    color:#2563EB;
+
+}
+
+.role-employee{
+
+    background:#E8FFF0;
+
+    color:#059669;
+
+}
+
+.action-buttons{
+
+    display:flex;
+
+    gap:10px;
+
+}
+
+/* ===========================
+   ACTION BUTTONS
+=========================== */
+
+.action-buttons{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:14px;
+
+}
+
+.table-icon-button{
+
+    width:52px;
+
+    height:52px;
+
+    border:none;
+
+    border-radius:16px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+.table-icon-button svg{
+
+    width:20px;
+
+    height:20px;
+
+}
+
+.edit-button{
+
+    background:#F7B344;
+
+    color:white;
+
+}
+
+.edit-button:hover{
+
+    background:#E89D17;
+
+    transform:translateY(-2px);
+
+}
+
+.delete-button{
+
+    background:#E23545;
+
+    color:white;
+
+}
+
+.delete-button:hover{
+
+    background:#C61B35;
+
+    transform:translateY(-2px);
+
+}
+
+/* ===========================
+   MODAL
+=========================== */
+
+.modal-overlay{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.45);
+
+    backdrop-filter:blur(6px);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:9999;
+
+}
+
+.document-modal{
+
+    width:650px;
+
+    max-width:95%;
+
+    height:min(90vh,700px);
+
+    background:white;
+
+    border-radius:22px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    overflow:hidden;
+
+    box-shadow:0 25px 70px rgba(0,0,0,.25);
+
+}
+
+.modal-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:24px 30px;
+
+    border-bottom:1px solid #ECECEC;
+
+}
+
+.modal-header h2{
+
+    margin:0;
+
+    color:#22243A;
+
+}
+
+.close-button{
+
+    border:none;
+
+    background:none;
+
+    font-size:28px;
+
+    cursor:pointer;
+
+    color:#888;
+
+}
+
+.close-button:hover{
+
+    color:#E11D48;
+
+}
+
+.modal-form{
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:0;
+
+}
+
+.modal-body{
+
+    flex:1;
+
+    min-height:0;
+
+    overflow-y:auto;
+
+    padding:30px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+}
+
+.modal-body input,
+.modal-body select{
+
+    width:100%;
+
+    padding:14px;
+
+    border-radius:12px;
+
+    border:1px solid #DDD;
+
+    font-size:15px;
+
+    transition:.25s;
+
+}
+
+.modal-body input:focus,
+.modal-body select:focus{
+
+    outline:none;
+
+    border-color:#307DBB;
+
+    box-shadow:0 0 0 4px rgba(48,125,187,.12);
+
+}
+
+.modal-footer{
+
+    flex-shrink:0;
+
+    padding:22px 30px;
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:14px;
+
+    border-top:1px solid #ECECEC;
+
+    background:white;
+
+}
+.cancel-btn{
+
+    border:none;
+
+    background:#F3F4F8;
+
+    padding:12px 22px;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+}
+
+.cancel-btn:hover{
+
+    background:#E5E7EB;
+
+}
+
+.save-btn{
+
+    border:none;
+
+    padding:12px 24px;
+
+    border-radius:12px;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+    background:linear-gradient(135deg,#882078,#307DBB);
+
+}
+
+.save-btn:hover{
+
+    opacity:.9;
+
+}
+
+.modal-error{
+
+    background:#FFE5E5;
+
+    color:#C62828;
+
+    padding:12px;
+
+    border-radius:12px;
 
 }

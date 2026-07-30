@@ -1,82 +1,115 @@
+import { Pencil, Trash2 } from "lucide-react";
+
 function UserTable({ users, onEdit, onDelete }) {
+
+    const getRoleClass = (role) => {
+
+        switch (role) {
+
+            case "ADMIN":
+                return "role-admin";
+
+            case "MANAGER":
+                return "role-manager";
+
+            default:
+                return "role-employee";
+
+        }
+
+    };
 
     return (
 
-        <table className="table table-bordered table-hover">
+        <div className="documents-card">
 
-            <thead className="table-dark">
+            <table className="documents-table">
 
-            <tr>
+                <thead>
 
-                <th>ID</th>
+                <tr>
 
-                <th>First Name</th>
+                    <th>ID</th>
 
-                <th>Last Name</th>
+                    <th>Name</th>
 
-                <th>Username</th>
+                    <th>Username</th>
 
-                <th>Email</th>
+                    <th>Email</th>
 
-                <th>Role</th>
+                    <th>Role</th>
 
-                <th>Actions</th>
+                    <th>Actions</th>
 
-            </tr>
+                </tr>
 
-            </thead>
+                </thead>
 
-            <tbody>
+                <tbody>
 
-            {
+                {
 
-                users.map((user) => (
+                    users.map((user) => (
 
-                    <tr key={user.id}>
+                        <tr key={user.id}>
 
-                        <td>{user.id}</td>
+                            <td>{user.id}</td>
 
-                        <td>{user.firstName}</td>
+                            <td>
 
-                        <td>{user.lastName}</td>
+                                {user.firstName} {user.lastName}
 
-                        <td>{user.username}</td>
+                            </td>
 
-                        <td>{user.email}</td>
+                            <td>{user.username}</td>
 
-                        <td>{user.role}</td>
+                            <td>{user.email}</td>
 
-                        <td>
+                            <td>
 
-                            <button
-                                className="btn btn-warning btn-sm me-2"
-                                onClick={() => onEdit(user)}
-                            >
+                                <span className={`role-badge ${getRoleClass(user.role)}`}>
 
-                                Edit
+                                    {user.role}
 
-                            </button>
+                                </span>
 
-                            <button
-                                className="btn btn-danger btn-sm"
-                                onClick={() => onDelete(user.id)}
-                            >
+                            </td>
 
-                                Delete
+                            <td className="action-buttons">
 
-                            </button>
+                                <button
+                                    className="table-icon-button edit-button"
+                                    onClick={() => onEdit(user)}
+                                    title="Edit User"
+                                >
 
-                        </td>
+                                    <Pencil size={18} />
 
-                    </tr>
+                                </button>
 
-                ))
+                                <button
+                                    className="table-icon-button delete-button"
+                                    onClick={() => onDelete(user.id)}
+                                    title="Delete User"
+                                >
 
-            }
+                                    <Trash2 size={18} />
 
-            </tbody>
+                                </button>
 
-        </table>
+                            </td>
+
+                        </tr>
+
+                    ))
+
+                }
+
+                </tbody>
+
+            </table>
+
+        </div>
 
     );
 

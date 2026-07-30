@@ -345,3 +345,49 @@ input::-ms-clear {
     }
 
 }
+
+.login-error{
+
+    width:100%;
+
+    padding:14px 16px;
+
+    margin-bottom:18px;
+
+    border-radius:12px;
+
+    background:#FFE5E5;
+
+    color:#C62828;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    text-align:center;
+
+    border:1px solid #F5B5B5;
+
+    animation:fadeIn .25s ease;
+
+}
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(-8px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}

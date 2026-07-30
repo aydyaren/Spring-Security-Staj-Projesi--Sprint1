@@ -1,18 +1,29 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 function ProtectedRoute({ children }) {
 
-    // Tarayıcıda kayıtlı Access Token'ı alır.
     const accessToken = localStorage.getItem("accessToken");
 
-    // Access Token yoksa Login sayfasına yönlendirir.
+    const location = useLocation();
+
     if (!accessToken) {
 
-        return <Navigate to="/" replace />;
+        return (
+
+            <Navigate
+
+                to="/"
+
+                replace
+
+                state={{ from: location.pathname }}
+
+            />
+
+        );
 
     }
 
-    // Access Token varsa ilgili sayfayı gösterir.
     return children;
 
 }

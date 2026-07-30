@@ -18,22 +18,39 @@ function Login() {
     // Şifreyi göster / gizle
     const [showPassword, setShowPassword] = useState(false);
 
+    // Hata mesajını tutar.
+    const [errorMessage, setErrorMessage] = useState("");
+
     // Sayfalar arasında geçiş yapmak için kullanılır.
     const navigate = useNavigate();
 
     // Login butonuna basıldığında çalışır.
     const handleLogin = async () => {
 
-        console.log("Login button clicked");
+        setErrorMessage("");
+
+        // Username kontrolü
+        if (!username.trim()) {
+
+            setErrorMessage("Please enter your username or email.");
+
+            return;
+
+        }
+
+        // Password kontrolü
+        if (!password.trim()) {
+
+            setErrorMessage("Please enter your password.");
+
+            return;
+
+        }
 
         try {
 
-            console.log("Sending request...");
-
             // Backend'e login isteği gönderir.
             const response = await login(username, password);
-
-            console.log("Response:", response);
 
             // Backend'den gelen Access Token'ı alır.
             const accessToken = response.accessToken;
@@ -45,16 +62,27 @@ function Login() {
             navigate("/dashboard");
 
         } catch (error) {
-            console.error("LOGIN ERROR:", error);
 
-            if (error.response) {
-                console.log("Status:", error.response.status);
-                console.log("Data:", error.response.data);
-            } else if (error.request) {
-                console.log("Request gönderildi ama cevap gelmedi:", error.request);
-            } else {
-                console.log("İstek oluşturulurken hata:", error.message);
+            console.error(error);
+
+            if (error.response?.status === 401) {
+
+                setErrorMessage("Invalid username or password.");
+
+                return;
+
             }
+
+            if (error.response?.status === 429) {
+
+                setErrorMessage("Too many login attempts. Please try again later.");
+
+                return;
+
+            }
+
+            setErrorMessage("Unable to connect to server.");
+
         }
 
     };
@@ -79,7 +107,7 @@ function Login() {
                 />
 
                 {/* Başlık */}
-                <h1>Welcome back</h1>
+                <h1>Welcome</h1>
 
                 {/* Username */}
                 <div className="input-group">
@@ -119,6 +147,21 @@ function Login() {
                     </span>
 
                 </div>
+
+                {/* Hata Mesajı */}
+                {
+
+                    errorMessage && (
+
+                        <div className="login-error">
+
+                            {errorMessage}
+
+                        </div>
+
+                    )
+
+                }
 
                 {/* Login Butonu */}
                 <button
