@@ -24,10 +24,16 @@ function Login() {
     // Login butonuna basıldığında çalışır.
     const handleLogin = async () => {
 
+        console.log("Login button clicked");
+
         try {
+
+            console.log("Sending request...");
 
             // Backend'e login isteği gönderir.
             const response = await login(username, password);
+
+            console.log("Response:", response);
 
             // Backend'den gelen Access Token'ı alır.
             const accessToken = response.accessToken;
@@ -39,9 +45,16 @@ function Login() {
             navigate("/dashboard");
 
         } catch (error) {
+            console.error("LOGIN ERROR:", error);
 
-            console.error(error);
-
+            if (error.response) {
+                console.log("Status:", error.response.status);
+                console.log("Data:", error.response.data);
+            } else if (error.request) {
+                console.log("Request gönderildi ama cevap gelmedi:", error.request);
+            } else {
+                console.log("İstek oluşturulurken hata:", error.message);
+            }
         }
 
     };
