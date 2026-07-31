@@ -61,7 +61,7 @@ The application provides secure authentication, role-based authorization, user m
 
 ---
 
-# 🎨 Frontend Features
+# Frontend Features
 
 Built with **React + Vite**
 
@@ -79,7 +79,7 @@ Built with **React + Vite**
 
 ---
 
-# ⚙️ Backend Features
+# Backend Features
 
 - RESTful API
 - DTO Architecture
@@ -93,7 +93,7 @@ Built with **React + Vite**
 
 ---
 
-# 🛠 Tech Stack
+# Tech Stack
 
 ## Backend
 
@@ -247,13 +247,21 @@ VITE_API_URL=http://127.0.0.1:8082
 # Screenshots
 
 - Login Page
+![img.png](img.png)
 - Dashboard
+![img_2.png](img_2.png)
 - User Management
+![img_3.png](img_3.png)
 - Document Management
+![img_4.png](img_4.png)
 - Upload Document
+![img_5.png](img_5.png)
 - Logout Confirmation Dialog
+![img_6.png](img_6.png)
 - Session Expired Modal
-- Swagger UI
+![img_7.png](img_7.png)
+
+
 
 ---
 
