@@ -259,39 +259,27 @@ public class DocumentService {
         }
     }
 
-    // İNDİRME / DÜZENLEME / SİLME için kullanılır: ADMIN her şeyi yapabilir,
-    // MANAGER admin dokümanları HARİÇ her şeyi yapabilir, EMPLOYEE sadece kendi dokümanında.
+    // İNDİRME / DÜZENLEME / SİLME için kullanılır.
+// ADMIN tüm dokümanlarda işlem yapabilir.
+// MANAGER ve EMPLOYEE sadece kendi dokümanlarında işlem yapabilir.
     private void checkModifyPermission(Document document) {
 
         User currentUser = getCurrentUser();
 
         String role = currentUser.getRole().getName();
-        String ownerRole = document.getOwner().getRole().getName();
 
-        //ADMIN her dokümanı indirebilir/düzenleyebilir/silebilir.
+        // ADMIN her dokümanda işlem yapabilir.
         if (role.equals("ADMIN")) {
             return;
         }
 
-        //MANAGER, ADMIN'e ait dokümanlar hariç indirebilir/düzenleyebilir/silebilir.
-        if (role.equals("MANAGER")) {
-
-            if (ownerRole.equals("ADMIN")) {
-                throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN,
-                        "You are not allowed to access this document"
-                );
-            }
-
-            return;
-        }
-
-        //EMPLOYEE sadece kendi dokümanını indirebilir/düzenleyebilir/silebilir.
+        // MANAGER ve EMPLOYEE sadece kendi dokümanlarında
+        // indirme, güncelleme ve silme işlemi yapabilir.
         if (!document.getOwner().getId().equals(currentUser.getId())) {
 
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
-                    "You are not allowed to access this document"
+                    "You are not allowed to modify this document"
             );
         }
     }
